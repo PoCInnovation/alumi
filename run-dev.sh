@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ "$1" == "help" ]] || [[ "$1" == "--help" ]]; then
+    echo "Usage: $0 [--help]"
+    echo "Description: Build and run Alumi development container"
+    exit 0
+fi
+
 CRI=""
 if command -v docker >/dev/null 2>&1; then
     CRI="docker"
