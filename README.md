@@ -1,4 +1,5 @@
 # Alumi
+
 Create a Native Pulumi Provider Package by using the full features of the Pulumi resource model to create a provider for Aleph.im.
 
 ## How does it work?
@@ -9,12 +10,13 @@ This project is a wrapper of [Aleph SDK](https://aleph-im.gitbook.io/ts-sdk/)
 
 ### Installation
 
-*Please make sure that NodeJS is correctly installed.*
+_Please make sure that NodeJS is correctly installed._
 
 ```
 #install pulumi using cURL
 curl -fsSL https://get.pulumi.com | sh
 ```
+
 If you don't use cURL, check this [Link](https://www.pulumi.com/docs/install/)
 
 ### Quickstart
