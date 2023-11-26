@@ -1,11 +1,21 @@
+#!/bin/bash
+
+mkdir -p alumi-module
+cp -r "../src" "./alumi-module"
+cp "../package.json" "./alumi-module"
+cp "../tsconfig.json" "./alumi-module"
+cp "../package-lock.json" "./alumi-module"
+cp -r "../dist" "./alumi-module"
+
+cat > package.json << EOF
 {
-  "name": "pulumi-dynamic-provider-aleph",
+  "name": "test-module-aleph",
   "version": "0.0.1",
-  "description": "Dynamic pulumi provider for Aleph",
+  "description": "test test",
   "main": "dist/index.js",
   "scripts": {
-    "build": "prettier --write tsconfig.json package.json src/* && tsc",
-    "test": "npm run build && cd tests && ./test.sh"
+    "build": "tsc",
+    "test": "node ./dist/src/index.js"
   },
   "repository": {
     "type": "git",
@@ -24,11 +34,13 @@
   },
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
-    "prettier": "^3.1.0",
     "typescript": "^5.3.2"
-  },
-  "dependencies": {
-    "@pulumi/pulumi": "^3.94.2",
-    "aleph-sdk-ts": "^3.7.0"
   }
 }
+EOF
+
+npm install
+npm add "./alumi-module"
+
+npm run build
+npm run test
