@@ -1,3 +1,6 @@
 package-lock.json
 package.json
 alumi-module
+
+/bin/
+/node_modules/
