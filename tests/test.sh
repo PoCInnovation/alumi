@@ -12,7 +12,7 @@ cat > package.json << EOF
   "name": "test-module-aleph",
   "version": "0.0.1",
   "description": "test test",
-  "main": "dist/index.js",
+  "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "test": "node ./dist/src/index.js"
