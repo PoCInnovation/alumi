@@ -25,7 +25,21 @@ If you don't use cURL, check this [Link](https://www.pulumi.com/docs/install/)
 
 ### Usage
 
-[Explain how to use this project]
+! You need to have `ACCOUNT_MNEMONIC` environment variable set.
+!! For now, only etherum account is supported.
+```bash
+export ACCOUNT_MNEMONIC="..."
+```
+
+1. Create a new project
+
+this will create the base of your new project
+
+```bash
+pulumi new typescript
+```
+
+2. Edit the `index.ts` file with the resources you want from Aleph
 
 ## Get involved
 

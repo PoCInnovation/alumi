@@ -33,4 +33,9 @@ RUN apt-get update \
 
 RUN npm install -g typescript yarn
 
+# This is the account mnemonic
+# it point to nothing and doesn't exist
+# but for test purposes it is here
+ENV ACCOUNT_MNEMONIC="siren mule help energy fault able snack raccoon vault answer chaos wire"
+
 CMD ["/bin/bash"]
