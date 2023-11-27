@@ -15,7 +15,7 @@ cat > package.json << EOF
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "node ./dist/src/index.js"
+    "test": "echo run ./run-dev.sh and go in the repository 'tests'"
   },
   "repository": {
     "type": "git",
