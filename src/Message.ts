@@ -22,6 +22,7 @@ interface MessageProviderInputs {
   postType: string;
   channel: string;
   storageEngine?: ItemType;
+  ref?: string;
 }
 
 interface MessageProviderOutputs {
@@ -43,8 +44,6 @@ interface MessageProviderOutputs {
   storageEngine?: ItemType;
 }
 
-const accountMnemonicProp = 'accountMnemonic';
-
 const contentProp = 'content';
 const postTypeProp = 'postType';
 const channelProp = 'channel';
@@ -56,22 +55,53 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
     olds: MessageProviderOutputs,
     news: MessageProviderInputs
   ) {
+    const deleteAndReplace = [];
     const replaces = [];
+    const changes = [];
 
     if (olds[contentProp] !== news[contentProp]) {
-      replaces.push(contentProp);
+      changes.push(contentProp);
     }
     if (olds[postTypeProp] !== news[postTypeProp]) {
-      replaces.push(postTypeProp);
+      deleteAndReplace.push(postTypeProp);
     }
     if (olds[channelProp] !== news[channelProp]) {
-      replaces.push(channelProp);
+      changes.push(channelProp);
     }
     if (olds[storageEngineProp] !== news[storageEngineProp]) {
       replaces.push(storageEngineProp);
     }
 
-    return { replaces: replaces };
+    if (deleteAndReplace.length > 0) {
+      return { deleteAndReplace: true };
+    } else if (replaces.length > 0) {
+      return { replaces: replaces };
+    } else if (changes.length > 0) {
+      return { changes: true };
+    } else {
+      return {};
+    }
+  },
+
+  async update(id: string, olds: MessageProviderOutputs, news: MessageProviderInputs) {
+    news.postType = "amend";
+    news.ref = olds.item_hash;
+    return await this.create(news);
+  },
+
+  async delete(id: string, props: MessageProviderOutputs) {
+    if (
+      process.env.ACCOUNT_MNEMONIC === undefined ||
+      process.env.ACCOUNT_MNEMONIC === ''
+    ) {
+      throw new Error('ACCOUNT_MNEMONIC is not set');
+    }
+    const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
+    await messages.forget.Publish({
+      account: account,
+      channel: props.channel,
+      hashes: [props.item_hash],
+    })
   },
 
   async create(
@@ -84,7 +114,6 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
       throw new Error('ACCOUNT_MNEMONIC is not set');
     }
     const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
-    console.log('in hereeee2', account.GetChain, account);
     const res = await messages.post.Publish({
       account: account,
       content: inputs[contentProp],
@@ -92,7 +121,6 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
       channel: inputs[channelProp],
       storageEngine: inputs[storageEngineProp],
     });
-    console.log('res', res);
 
     const out: MessageProviderOutputs = {
       ...inputs,
