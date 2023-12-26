@@ -95,7 +95,7 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
       storageEngine: news[storageEngineProp],
       ref: olds.item_hash,
     };
-    return await this.create(news);
+    return await this.create(inputs);
   },
 
   async delete(id: string, props: MessageProviderOutputs) {
