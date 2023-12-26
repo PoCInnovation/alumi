@@ -11,7 +11,7 @@ export const basicResLenName = basicRes.lenName;
 
 export const message = new Message("first-message", {
     content: {
-        body: "hello from pulumi"
+        body: "hello from pulumi - edit - edit too"
     },
     postType: "pulumi-test-type",
     channel: "pulumi-test-channel",
