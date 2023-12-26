@@ -83,9 +83,18 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
     }
   },
 
-  async update(id: string, olds: MessageProviderOutputs, news: MessageProviderInputs) {
-    news.postType = "amend";
-    news.ref = olds.item_hash;
+  async update(
+    id: string,
+    olds: MessageProviderOutputs,
+    news: MessageProviderInputs
+  ) {
+    const inputs = {
+      content: news[contentProp],
+      postType: 'amend',
+      channel: news[channelProp],
+      storageEngine: news[storageEngineProp],
+      ref: olds.item_hash,
+    };
     return await this.create(news);
   },
 
@@ -101,7 +110,7 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
       account: account,
       channel: props.channel,
       hashes: [props.item_hash],
-    })
+    });
   },
 
   async create(
@@ -120,6 +129,7 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
       postType: inputs[postTypeProp],
       channel: inputs[channelProp],
       storageEngine: inputs[storageEngineProp],
+      ref: inputs.ref,
     });
 
     const out: MessageProviderOutputs = {

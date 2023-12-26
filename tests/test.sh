@@ -14,7 +14,6 @@ cat > package.json << EOF
   "description": "test test",
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc",
     "test": "echo run ./run-dev.sh and go in the repository 'tests'"
   },
   "repository": {
@@ -42,5 +41,4 @@ EOF
 npm install
 npm add "./alumi-module"
 
-npm run build
 npm run test
