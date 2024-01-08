@@ -8,7 +8,7 @@ fi
 
 CRI=""
 if command -v docker >/dev/null 2>&1; then
-    CRI="docker"
+    CRI="sudo docker"
 elif command -v podman >/dev/null 2>&1; then
     CRI="podman"
 else
