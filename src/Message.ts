@@ -158,6 +158,38 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
       outs: out,
     };
   },
+
+  async read(id: string, props: MessageProviderInputs) {
+    const res = await messages.post.Get({
+      types: `${props.postType},amend`,
+      hashes: [id],
+    });
+    if (res.posts.length != 1) {
+      throw new Error(
+        `Message not found (found ${res.posts.length} posts corresponding with hash '${id}' and type '${props.postType},amend')`
+      );
+    }
+
+    const out: MessageProviderOutputs = {
+      ...props,
+      chain: res.posts[0].chain,
+      sender: res.posts[0].sender,
+      type: res.posts[0].type,
+      channel: res.posts[0].channel,
+      confirmed: res.posts[0].confirmed,
+      signature: res.posts[0].signature,
+      size: res.posts[0].size,
+      time: res.posts[0].time,
+      item_type: res.posts[0].item_type,
+      item_hash: res.posts[0].item_hash,
+      aleph_explorer_url: `https://explorer.aleph.im/address/${res.posts[0].chain}/${res.posts[0].sender}/message/${res.posts[0].type}/${res.posts[0].item_hash}`,
+    };
+
+    return {
+      id: id,
+      outs: out,
+    };
+  },
 };
 
 export class Message extends pulumi.dynamic.Resource {
@@ -190,6 +222,7 @@ export class Message extends pulumi.dynamic.Resource {
       MessageProvider,
       name,
       {
+        ...props,
         chain: undefined,
         sender: undefined,
         type: undefined,
@@ -202,7 +235,6 @@ export class Message extends pulumi.dynamic.Resource {
         hash_type: undefined,
         item_hash: undefined,
         aleph_explorer_url: undefined,
-        ...props,
       },
       opts
     );
