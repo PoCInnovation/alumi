@@ -29,8 +29,8 @@ If you don't use cURL, check this [Link](https://www.pulumi.com/docs/install/)
 > You need to have `ACCOUNT_MNEMONIC` environment variable set.
 > For now, only etherum account is supported.
 > ```bash
-export ACCOUNT_MNEMONIC="..."
-```
+> export ACCOUNT_MNEMONIC="..."
+> ```
 
 ! For delegate update, put the address of the original post message author
 ```bash
