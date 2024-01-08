@@ -122,8 +122,13 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
     ) {
       throw new Error('ACCOUNT_MNEMONIC is not set');
     }
+    const opts: { [key: string]: any } = {};
+    if (process.env.DELEGATE_ADDRESS !== undefined) {
+      opts.address = process.env.DELEGATE_ADDRESS;
+    }
     const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
     const res = await messages.post.Publish({
+      ...opts,
       account: account,
       content: inputs[contentProp],
       postType: inputs[postTypeProp],
