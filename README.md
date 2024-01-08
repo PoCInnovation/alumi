@@ -27,15 +27,17 @@ If you don't use cURL, check this [Link](https://www.pulumi.com/docs/install/)
 
 > [!WARNING]  
 > You need to have `ACCOUNT_MNEMONIC` environment variable set.
+>
 > For now, only etherum account is supported.
 > ```bash
 > export ACCOUNT_MNEMONIC="..."
 > ```
 
-! For delegate update, put the address of the original post message author
-```bash
-export DELEGATE_ADDRESS="..."
-```
+> [!NOTE]  
+> For delegate update, put the address of the original post message author.
+> ```bash
+> export DELEGATE_ADDRESS="..."
+> ```
 
 1. Create a new project
 
