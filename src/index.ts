@@ -1,9 +1,8 @@
 import { BasicTestInputs, BasicTest } from './BasicTest';
 export { BasicTestInputs, BasicTest };
 
-import { MessageInputs, Message } from './Message';
-export { MessageInputs, Message };
+import { PostInputs, Post } from './Post';
+export { PostInputs, Post };
 
-export const basicTest = () => {
-  console.log('this is here!');
-};
+import { AggregateInputs, Aggregate } from './Aggregate';
+export { AggregateInputs, Aggregate };

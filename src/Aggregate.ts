@@ -10,22 +10,22 @@ export type JSONValue =
   | { [x: string]: JSONValue }
   | Array<JSONValue>;
 
-export interface MessageInputs {
+export interface AggregateInputs {
+  key: pulumi.Input<string>;
   content: pulumi.Input<{ [x: string]: JSONValue }>;
-  postType: pulumi.Input<string>;
   channel: pulumi.Input<string>;
   storageEngine: pulumi.Input<ItemType>;
 }
 
-interface MessageProviderInputs {
+interface AggregateProviderInputs {
+  key: string;
   content: { [x: string]: JSONValue };
-  postType: string;
   channel: string;
   storageEngine?: ItemType;
-  ref?: string;
 }
 
-interface MessageProviderOutputs {
+interface AggregateProviderOutputs {
+  key: string;
   chain: string;
   sender: string;
   type: string;
@@ -40,20 +40,19 @@ interface MessageProviderOutputs {
   item_hash: string;
   aleph_explorer_url: string;
   content: { [x: string]: JSONValue };
-  postType: string;
   storageEngine?: ItemType;
 }
 
+const keyProp = 'key';
 const contentProp = 'content';
-const postTypeProp = 'postType';
 const channelProp = 'channel';
 const storageEngineProp = 'storageEngine';
 
-const MessageProvider: pulumi.dynamic.ResourceProvider = {
+const AggregateProvider: pulumi.dynamic.ResourceProvider = {
   async diff(
     id: string,
-    olds: MessageProviderOutputs,
-    news: MessageProviderInputs
+    olds: AggregateProviderOutputs,
+    news: AggregateProviderInputs
   ) {
     const deleteAndReplace = [];
     const replaces = [];
@@ -62,14 +61,14 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
     if (olds[contentProp] !== news[contentProp]) {
       changes.push(contentProp);
     }
-    if (olds[postTypeProp] !== news[postTypeProp]) {
-      deleteAndReplace.push(postTypeProp);
-    }
     if (olds[channelProp] !== news[channelProp]) {
       changes.push(channelProp);
     }
     if (olds[storageEngineProp] !== news[storageEngineProp]) {
       replaces.push(storageEngineProp);
+    }
+    if (olds[keyProp] !== news[keyProp]) {
+      deleteAndReplace.push(keyProp);
     }
 
     if (deleteAndReplace.length > 0) {
@@ -85,20 +84,18 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
 
   async update(
     id: string,
-    olds: MessageProviderOutputs,
-    news: MessageProviderInputs
+    olds: AggregateProviderOutputs,
+    news: AggregateProviderInputs
   ) {
     const inputs = {
       content: news[contentProp],
-      postType: 'amend',
       channel: news[channelProp],
       storageEngine: news[storageEngineProp],
-      ref: olds.item_hash,
     };
     return await this.create(inputs);
   },
 
-  async delete(id: string, props: MessageProviderOutputs) {
+  async delete(id: string, props: AggregateProviderOutputs) {
     if (
       process.env.ACCOUNT_MNEMONIC === undefined ||
       process.env.ACCOUNT_MNEMONIC === ''
@@ -114,8 +111,8 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
   },
 
   async create(
-    inputs: MessageProviderInputs
-  ): Promise<pulumi.dynamic.CreateResult<MessageProviderOutputs>> {
+    inputs: AggregateProviderInputs
+  ): Promise<pulumi.dynamic.CreateResult<AggregateProviderOutputs>> {
     if (
       process.env.ACCOUNT_MNEMONIC === undefined ||
       process.env.ACCOUNT_MNEMONIC === ''
@@ -127,17 +124,16 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
       opts.address = process.env.DELEGATE_ADDRESS;
     }
     const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
-    const res = await messages.post.Publish({
+    const res = await messages.aggregate.Publish({
       ...opts,
       account: account,
+      key: inputs[keyProp],
       content: inputs[contentProp],
-      postType: inputs[postTypeProp],
       channel: inputs[channelProp],
       storageEngine: inputs[storageEngineProp],
-      ref: inputs.ref,
     });
 
-    const out: MessageProviderOutputs = {
+    const out: AggregateProviderOutputs = {
       ...inputs,
       chain: res.chain,
       sender: res.sender,
@@ -164,40 +160,44 @@ const MessageProvider: pulumi.dynamic.ResourceProvider = {
     };
   },
 
-  async read(id: string, props: MessageProviderInputs) {
-    const res = await messages.post.Get({
-      types: `${props.postType},amend`,
-      hashes: [id],
+  async read(id: string, props: AggregateProviderInputs) {
+    if (process.env.DELEGATE_ADDRESS === undefined) {
+      throw new Error('DELEGATE_ADDRESS is not set');
+    }
+    const res: { [key: string]: JSONValue } = await messages.aggregate.Get({
+      keys: [props.key],
+      address: process.env.DELEGATE_ADDRESS,
     });
-    if (res.posts.length != 1) {
-      throw new Error(
-        `Message not found (found ${res.posts.length} posts corresponding with hash '${id}' and type '${props.postType},amend')`
-      );
+
+    if (res[props.key] === null || res[props.key] === undefined) {
+      throw new Error('Aggregate not found');
     }
 
-    const out: MessageProviderOutputs = {
-      ...props,
-      chain: res.posts[0].chain,
-      sender: res.posts[0].sender,
-      type: res.posts[0].type,
-      channel: res.posts[0].channel,
-      confirmed: res.posts[0].confirmed,
-      signature: res.posts[0].signature,
-      size: res.posts[0].size,
-      time: res.posts[0].time,
-      item_type: res.posts[0].item_type,
-      item_hash: res.posts[0].item_hash,
-      aleph_explorer_url: `https://explorer.aleph.im/address/${res.posts[0].chain}/${res.posts[0].sender}/message/${res.posts[0].type}/${res.posts[0].item_hash}`,
-    };
+    throw new Error('Not implemented:: Pulumi does not support returning values needed for this');
 
-    return {
-      id: id,
-      outs: out,
-    };
+  //   const out: AggregateProviderOutputs = {
+  //     ...props,
+  //     chain: res.posts[0].chain,
+  //     sender: res.posts[0].sender,
+  //     type: res.posts[0].type,
+  //     channel: res.posts[0].channel,
+  //     confirmed: res.posts[0].confirmed,
+  //     signature: res.posts[0].signature,
+  //     size: res.posts[0].size,
+  //     time: res.posts[0].time,
+  //     item_type: res.posts[0].item_type,
+  //     item_hash: res.posts[0].item_hash,
+  //     aleph_explorer_url: `https://explorer.aleph.im/address/${res.posts[0].chain}/${res.posts[0].sender}/message/${res.posts[0].type}/${res.posts[0].item_hash}`,
+  //   };
+  //
+  //   return {
+  //     id: id,
+  //     outs: out,
+  //   };
   },
 };
 
-export class Message extends pulumi.dynamic.Resource {
+export class Aggregate extends pulumi.dynamic.Resource {
   public readonly chain!: pulumi.Output<string>;
   public readonly sender!: pulumi.Output<string>;
   public readonly type!: pulumi.Output<string>;
@@ -214,7 +214,7 @@ export class Message extends pulumi.dynamic.Resource {
 
   constructor(
     name: string,
-    props: MessageInputs,
+    props: AggregateInputs,
     opts?: pulumi.CustomResourceOptions
   ) {
     if (
@@ -224,7 +224,7 @@ export class Message extends pulumi.dynamic.Resource {
       throw new Error('ACCOUNT_MNEMONIC is not set');
     }
     super(
-      MessageProvider,
+      AggregateProvider,
       name,
       {
         ...props,
