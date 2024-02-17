@@ -1,9 +1,9 @@
-import { Message } from "pulumi-dynamic-provider-aleph";
+import { Post } from "pulumi-dynamic-provider-aleph";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 import * as pulumi from "@pulumi/pulumi";
 
 
-export const message = new Message("first-message", {
+export const message = new Post("first-message", {
     content: {
         body: "hello from pulumi - edit - edit too - but one more is fine ?"
     },
@@ -13,7 +13,7 @@ export const message = new Message("first-message", {
 });
 export const alephExporerUrl = message.aleph_explorer_url;
 
-export const message2 = new Message("second-message", {
+export const message2 = new Post("second-message", {
     content: {
         body: "second test just here"
     },
