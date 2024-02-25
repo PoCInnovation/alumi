@@ -15,6 +15,7 @@ export interface PostInputs {
   postType: pulumi.Input<string>;
   channel: pulumi.Input<string>;
   storageEngine: pulumi.Input<ItemType>;
+  ref: pulumi.Input<string>; // can be empty
 }
 
 interface PostProviderInputs {
@@ -25,7 +26,7 @@ interface PostProviderInputs {
   ref?: string;
 }
 
-interface PostProviderOutputs {
+export interface PostProviderOutputs {
   chain: string;
   sender: string;
   type: string;
@@ -50,11 +51,7 @@ const channelProp = 'channel';
 const storageEngineProp = 'storageEngine';
 
 const PostProvider: pulumi.dynamic.ResourceProvider = {
-  async diff(
-    id: string,
-    olds: PostProviderOutputs,
-    news: PostProviderInputs
-  ) {
+  async diff(id: string, olds: PostProviderOutputs, news: PostProviderInputs) {
     const deleteAndReplace = [];
     const replaces = [];
     const changes = [];

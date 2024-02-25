@@ -14,5 +14,6 @@ npm run build # build the project
 # Now that you are in the container, you can test the project
 cd tests # go to the tests folder
 ./test.sh # setup the tests (it copy the builded project before and install it for the current tests folder
+cd test1
 # Now, you can use the `pulumi` command line tool
 ```

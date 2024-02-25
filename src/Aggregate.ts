@@ -173,27 +173,29 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
       throw new Error('Aggregate not found');
     }
 
-    throw new Error('Not implemented:: Pulumi does not support returning values needed for this');
+    throw new Error(
+      'Not implemented:: Pulumi does not support returning values needed for this'
+    );
 
-  //   const out: AggregateProviderOutputs = {
-  //     ...props,
-  //     chain: res.posts[0].chain,
-  //     sender: res.posts[0].sender,
-  //     type: res.posts[0].type,
-  //     channel: res.posts[0].channel,
-  //     confirmed: res.posts[0].confirmed,
-  //     signature: res.posts[0].signature,
-  //     size: res.posts[0].size,
-  //     time: res.posts[0].time,
-  //     item_type: res.posts[0].item_type,
-  //     item_hash: res.posts[0].item_hash,
-  //     aleph_explorer_url: `https://explorer.aleph.im/address/${res.posts[0].chain}/${res.posts[0].sender}/message/${res.posts[0].type}/${res.posts[0].item_hash}`,
-  //   };
-  //
-  //   return {
-  //     id: id,
-  //     outs: out,
-  //   };
+    //   const out: AggregateProviderOutputs = {
+    //     ...props,
+    //     chain: res.posts[0].chain,
+    //     sender: res.posts[0].sender,
+    //     type: res.posts[0].type,
+    //     channel: res.posts[0].channel,
+    //     confirmed: res.posts[0].confirmed,
+    //     signature: res.posts[0].signature,
+    //     size: res.posts[0].size,
+    //     time: res.posts[0].time,
+    //     item_type: res.posts[0].item_type,
+    //     item_hash: res.posts[0].item_hash,
+    //     aleph_explorer_url: `https://explorer.aleph.im/address/${res.posts[0].chain}/${res.posts[0].sender}/message/${res.posts[0].type}/${res.posts[0].item_hash}`,
+    //   };
+    //
+    //   return {
+    //     id: id,
+    //     outs: out,
+    //   };
   },
 };
 
