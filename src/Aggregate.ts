@@ -145,7 +145,9 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
       time: res.time,
       item_type: res.item_type,
       item_hash: res.item_hash,
-      aleph_explorer_url: encodeURI(`https://explorer.aleph.im/address/${res.chain}/${res.sender}/message/${res.type}/${res.item_hash}`),
+      aleph_explorer_url: encodeURI(
+        `https://explorer.aleph.im/address/${res.chain}/${res.sender}/message/${res.type}/${res.item_hash}`
+      ),
     };
     if (res.item_content !== undefined) {
       out.item_content = res.item_content;
@@ -165,6 +167,7 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
       throw new Error('DELEGATE_ADDRESS is not set');
     }
     const res: { [key: string]: JSONValue } = await messages.aggregate.Get({
+      // @ts-ignore
       keys: [props.key],
       address: process.env.DELEGATE_ADDRESS,
     });

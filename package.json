@@ -4,8 +4,7 @@
   "description": "Dynamic pulumi provider for Aleph",
   "main": "dist/index.js",
   "scripts": {
-    "build": "prettier --write tsconfig.json package.json src/* && tsc",
-    "test": "npm run build && cd tests && ./test.sh"
+    "build": "prettier --write tsconfig.json package.json src/* && tsc"
   },
   "repository": {
     "type": "git",
@@ -24,11 +23,13 @@
   },
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
+    "@types/mime-types": "^2.1.4",
     "prettier": "^3.1.0",
     "typescript": "^5.3.2"
   },
   "dependencies": {
     "@pulumi/pulumi": "^3.94.2",
-    "aleph-sdk-ts": "^3.7.0"
+    "aleph-sdk-ts": "^3.7.0",
+    "mime-types": "^2.1.35"
   }
 }

@@ -1,4 +1,4 @@
-FROM docker.io/debian:12-slim
+FROM docker.io/node:lts-slim
 
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
@@ -7,11 +7,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
         curl \
         gnupg \
         lsb-release \
-        git \
-        nodejs \
-        npm
-
-RUN npm install -g typescript yarn
+        git
 
 RUN curl -fsSL https://get.pulumi.com | sh
 ENV PATH="/root/.pulumi/bin:${PATH}"
