@@ -1,3 +1,0 @@
-name: test-basictest
-runtime: nodejs
-description: A minimal TypeScript Pulumi program

@@ -1,11 +1,12 @@
 #!/bin/bash
 
+rm -rf alumi-module
 mkdir -p alumi-module
-cp -r "../../src" "./alumi-module"
-cp "../../package.json" "./alumi-module"
-cp "../../tsconfig.json" "./alumi-module"
-cp "../../package-lock.json" "./alumi-module"
-cp -r "../../dist" "./alumi-module"
+cp -r "../src" "./alumi-module"
+cp "../package.json" "./alumi-module"
+cp "../tsconfig.json" "./alumi-module"
+cp "../package-lock.json" "./alumi-module"
+cp -r "../dist" "./alumi-module"
 
 cat > package.json << EOF
 {
@@ -32,7 +33,8 @@ cat > package.json << EOF
   },
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
-    "typescript": "^5.3.2"
+    "typescript": "^5.3.2",
+    "ts-node": "^10.9.2"
   }
 }
 EOF
@@ -40,5 +42,5 @@ EOF
 npm install
 npm add "./alumi-module"
 
-echo "when in the folder test2"
-echo "you will need to copy paste the env.copy file in your terminal"
+echo "Please export env variable like this:"
+echo "export ETH_ACCOUNT_MNEMONIC='ETHERUM:MNEMONIK:love velvet doctor enough general tail orphan ivory skirt wait athlete enforce'"
