@@ -3,7 +3,7 @@ import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base.d.ts';
 import { Publish as publishStore } from 'aleph-sdk-ts/dist/messages/store';
 import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
 import { Get as getStore } from 'aleph-sdk-ts/dist/messages/store';
-import { getAccount, hashString } from './utils';
+import { getAccount, hashString, getAlephExplorerUrl } from './utils';
 
 export interface StoreStringInputs {
   stringContent: pulumi.Input<string>;
@@ -101,7 +101,6 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
       type: inputs[propStringContentMimeType],
     });
     const stringHash = hashString(inputs[propStringContent]);
-    console.log('Channel', inputs[propChannel]);
     const res = await publishStore({
       account: account,
       channel: inputs[propChannel],
@@ -127,15 +126,17 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
       content_item_type: res.content.item_type,
       content_item_hash: res.content.item_hash,
       content_time: res.content.time,
-      aleph_explorer_url: encodeURI(
-        `https://explorer.aleph.im/address/${res.chain}/${res.sender}/message/${res.type}/${res.item_hash}`
+      aleph_explorer_url: getAlephExplorerUrl(
+        res.chain,
+        res.sender,
+        res.type,
+        res.item_hash
       ),
-      raw_file_url: encodeURI(
-        `https://api2.aleph.im/api/v0/storage/raw/${res.content.item_hash}`
-      ),
+      raw_file_url:
+        'https://api2.aleph.im/api/v0/storage/raw/' +
+        encodeURIComponent(res.content.item_hash),
       string_content_hashed: stringHash,
     };
-    console.error(out);
     return {
       id: `${account.address}-${res.item_hash}`,
       outs: out,
