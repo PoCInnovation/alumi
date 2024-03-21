@@ -109,3 +109,21 @@ export const getAccount = async (envName?: string): Promise<Account> => {
 export const hashString = (s: string) => {
   return crypto.createHash('md5').update(s).digest('hex');
 };
+
+export const getAlephExplorerUrl = (
+  chain: string,
+  sender: string,
+  type: string,
+  item_hash: string
+) => {
+  return (
+    'https://explorer.aleph.im/address/' +
+    encodeURIComponent(chain) +
+    '/' +
+    encodeURIComponent(sender) +
+    '/message/' +
+    encodeURIComponent(type) +
+    '/' +
+    encodeURIComponent(item_hash)
+  );
+};
