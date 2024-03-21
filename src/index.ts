@@ -1,8 +1,5 @@
-import { BasicTestInputs, BasicTest } from './BasicTest';
-export { BasicTestInputs, BasicTest };
-
-import { PostInputs, Post, PostProviderOutputs } from './Post';
-export { PostInputs, Post, PostProviderOutputs };
+import { PostInputs, Post, PostOutputs } from './Post';
+export { PostInputs, Post, PostOutputs };
 
 import { AggregateInputs, Aggregate } from './Aggregate';
 export { AggregateInputs, Aggregate };

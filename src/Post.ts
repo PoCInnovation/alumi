@@ -1,7 +1,9 @@
 import * as pulumi from '@pulumi/pulumi';
-import { messages } from 'aleph-sdk-ts';
 import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base.d.ts';
-import { ImportAccountFromMnemonic } from 'aleph-sdk-ts/dist/accounts/ethereum';
+import { Publish as publishPost } from 'aleph-sdk-ts/dist/messages/post';
+import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
+import { Get as getPost } from 'aleph-sdk-ts/dist/messages/post';
+import { getAccount, getAlephExplorerUrl } from './utils';
 
 export type JSONValue =
   | string
@@ -16,17 +18,32 @@ export interface PostInputs {
   channel: pulumi.Input<string>;
   storageEngine: pulumi.Input<ItemType>;
   ref: pulumi.Input<string>; // can be empty
+  accountEnvName: pulumi.Input<string>;
 }
 
 interface PostProviderInputs {
   content: { [x: string]: JSONValue };
   postType: string;
   channel: string;
-  storageEngine?: ItemType;
-  ref?: string;
+  storageEngine: ItemType;
+  ref: string;
+  accountEnvName: string;
 }
 
-export interface PostProviderOutputs {
+const propContent = 'content';
+const propPostType = 'postType';
+const propChannel = 'channel';
+const propStorageEngine = 'storageEngine';
+const propRef = 'ref';
+const propAccountEnvName = 'accountEnvName';
+
+export interface PostOutputs {
+  // inputs
+  content: { [x: string]: JSONValue };
+  postType: string;
+  storageEngine: ItemType;
+  accountEnvName: string;
+  // outputs
   chain: string;
   sender: string;
   type: string;
@@ -36,106 +53,84 @@ export interface PostProviderOutputs {
   size: number;
   time: number;
   item_type: string;
-  item_content?: string;
-  hash_type?: string;
   item_hash: string;
+  // Created
+  content_address: string;
+  content_type: string;
+  content_content: { [x: string]: JSONValue };
+  content_time: number;
   aleph_explorer_url: string;
-  content: { [x: string]: JSONValue };
-  postType: string;
-  storageEngine?: ItemType;
 }
 
-const contentProp = 'content';
-const postTypeProp = 'postType';
-const channelProp = 'channel';
-const storageEngineProp = 'storageEngine';
-
 const PostProvider: pulumi.dynamic.ResourceProvider = {
-  async diff(id: string, olds: PostProviderOutputs, news: PostProviderInputs) {
+  async diff(id: string, olds: PostOutputs, news: PostProviderInputs) {
     const deleteAndReplace = [];
     const replaces = [];
     const changes = [];
 
-    if (olds[contentProp] !== news[contentProp]) {
-      changes.push(contentProp);
+    if (olds[propContent] !== news[propContent]) {
+      changes.push(propContent);
     }
-    if (olds[postTypeProp] !== news[postTypeProp]) {
-      deleteAndReplace.push(postTypeProp);
+    if (olds[propPostType] !== news[propPostType]) {
+      replaces.push(propPostType);
     }
-    if (olds[channelProp] !== news[channelProp]) {
-      changes.push(channelProp);
+    if (olds[propChannel] !== news[propChannel]) {
+      replaces.push(propChannel);
     }
-    if (olds[storageEngineProp] !== news[storageEngineProp]) {
-      replaces.push(storageEngineProp);
+    if (olds[propStorageEngine] !== news[propStorageEngine]) {
+      replaces.push(propStorageEngine);
     }
 
-    if (deleteAndReplace.length > 0) {
-      return { deleteAndReplace: true };
-    } else if (replaces.length > 0) {
+    if (replaces.length > 0) {
       return { replaces: replaces };
     } else if (changes.length > 0) {
       return { changes: true };
     } else {
-      return {};
+      return { changes: false };
     }
   },
 
-  async update(
-    id: string,
-    olds: PostProviderOutputs,
-    news: PostProviderInputs
-  ) {
+  async update(id: string, olds: PostOutputs, news: PostProviderInputs) {
     const inputs = {
-      content: news[contentProp],
+      content: news[propContent],
       postType: 'amend',
-      channel: news[channelProp],
-      storageEngine: news[storageEngineProp],
+      channel: news[propChannel],
+      storageEngine: news[propStorageEngine],
       ref: olds.item_hash,
     };
     return await this.create(inputs);
   },
 
-  async delete(id: string, props: PostProviderOutputs) {
-    if (
-      process.env.ACCOUNT_MNEMONIC === undefined ||
-      process.env.ACCOUNT_MNEMONIC === ''
-    ) {
-      throw new Error('ACCOUNT_MNEMONIC is not set');
-    }
-    const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
-    await messages.forget.Publish({
+  async delete(id: string, props: PostOutputs) {
+    const account = await getAccount(props[propAccountEnvName]);
+    await publishForget({
       account: account,
-      channel: props.channel,
+      channel: props[propChannel],
       hashes: [props.item_hash],
     });
   },
 
   async create(
     inputs: PostProviderInputs
-  ): Promise<pulumi.dynamic.CreateResult<PostProviderOutputs>> {
-    if (
-      process.env.ACCOUNT_MNEMONIC === undefined ||
-      process.env.ACCOUNT_MNEMONIC === ''
-    ) {
-      throw new Error('ACCOUNT_MNEMONIC is not set');
-    }
-    const opts: { [key: string]: any } = {};
-    if (process.env.DELEGATE_ADDRESS !== undefined) {
-      opts.address = process.env.DELEGATE_ADDRESS;
-    }
-    const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
-    const res = await messages.post.Publish({
-      ...opts,
+  ): Promise<pulumi.dynamic.CreateResult<PostOutputs>> {
+    const account = await getAccount(inputs[propAccountEnvName]);
+    const ref = inputs[propRef] == '' ? undefined : inputs[propRef];
+    const res = await publishPost({
       account: account,
-      content: inputs[contentProp],
-      postType: inputs[postTypeProp],
-      channel: inputs[channelProp],
-      storageEngine: inputs[storageEngineProp],
-      ref: inputs.ref,
+      content: inputs[propContent],
+      postType: inputs[propPostType],
+      channel: inputs[propChannel],
+      storageEngine: inputs[propStorageEngine],
+      ref: ref,
     });
 
-    const out: PostProviderOutputs = {
-      ...inputs,
+    const out: PostOutputs = {
+      // inputs
+      content: inputs[propContent],
+      postType: inputs[propPostType],
+      storageEngine: inputs[propStorageEngine],
+      accountEnvName: inputs[propAccountEnvName],
+      // outputs
       chain: res.chain,
       sender: res.sender,
       type: res.type,
@@ -146,16 +141,19 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
       time: res.time,
       item_type: res.item_type,
       item_hash: res.item_hash,
-      aleph_explorer_url: encodeURI(
-        `https://explorer.aleph.im/address/${res.chain}/${res.sender}/message/${res.type}/${res.item_hash}`
+      // Created
+      content_address: res.content.address,
+      content_type: res.content.type,
+      content_content:
+        res.content.content !== undefined ? res.content.content : {},
+      content_time: res.content.time,
+      aleph_explorer_url: getAlephExplorerUrl(
+        res.chain,
+        res.sender,
+        res.type,
+        res.item_hash
       ),
     };
-    if (res.item_content !== undefined) {
-      out.item_content = res.item_content;
-    }
-    if (res.hash_type !== undefined) {
-      out.hash_type = res.hash_type;
-    }
 
     return {
       id: `${account.address}-${res.item_hash}`,
@@ -163,10 +161,10 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
     };
   },
 
-  async read(id: string, props: PostProviderInputs) {
-    const res = await messages.post.Get({
-      types: `${props.postType},amend`,
-      hashes: [id],
+  async read(id: string, props: PostOutputs) {
+    const res = await getPost({
+      types: `${props.postType}`,
+      hashes: [props.item_hash],
     });
     if (res.posts.length != 1) {
       throw new Error(
@@ -174,7 +172,7 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
       );
     }
 
-    const out: PostProviderOutputs = {
+    const out: PostOutputs = {
       ...props,
       chain: res.posts[0].chain,
       sender: res.posts[0].sender,
@@ -186,7 +184,20 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
       time: res.posts[0].time,
       item_type: res.posts[0].item_type,
       item_hash: res.posts[0].item_hash,
-      aleph_explorer_url: `https://explorer.aleph.im/address/${res.posts[0].chain}/${res.posts[0].sender}/message/${res.posts[0].type}/${res.posts[0].item_hash}`,
+      // @ts-ignore
+      content_address: res.posts[0].content.address,
+      // @ts-ignore
+      content_type: res.posts[0].content.type,
+      // @ts-ignore
+      content_content: res.posts[0].content.content,
+      // @ts-ignore
+      content_time: res.posts[0].content.time,
+      aleph_explorer_url: getAlephExplorerUrl(
+        res.posts[0].chain,
+        res.posts[0].sender,
+        res.posts[0].type,
+        res.posts[0].item_hash
+      ),
     };
 
     return {
@@ -197,6 +208,12 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
 };
 
 export class Post extends pulumi.dynamic.Resource {
+  // inputs
+  public readonly content!: pulumi.Output<{ [x: string]: JSONValue }>;
+  public readonly postType!: pulumi.Output<string>;
+  public readonly storageEngine!: pulumi.Output<string>;
+  public readonly accountEnvName!: pulumi.Output<string>;
+  // outputs
   public readonly chain!: pulumi.Output<string>;
   public readonly sender!: pulumi.Output<string>;
   public readonly type!: pulumi.Output<string>;
@@ -206,9 +223,12 @@ export class Post extends pulumi.dynamic.Resource {
   public readonly size!: pulumi.Output<number>;
   public readonly time!: pulumi.Output<number>;
   public readonly item_type!: pulumi.Output<string>;
-  public readonly item_content!: pulumi.Output<string | undefined>;
-  public readonly hash_type!: pulumi.Output<string | undefined>;
   public readonly item_hash!: pulumi.Output<string>;
+  // Created
+  public readonly content_address!: pulumi.Output<string>;
+  public readonly content_type!: pulumi.Output<string>;
+  public readonly content_content!: pulumi.Output<{ [x: string]: JSONValue }>;
+  public readonly content_time!: pulumi.Output<number>;
   public readonly aleph_explorer_url!: pulumi.Output<string>;
 
   constructor(
@@ -216,17 +236,11 @@ export class Post extends pulumi.dynamic.Resource {
     props: PostInputs,
     opts?: pulumi.CustomResourceOptions
   ) {
-    if (
-      process.env.ACCOUNT_MNEMONIC === undefined ||
-      process.env.ACCOUNT_MNEMONIC === ''
-    ) {
-      throw new Error('ACCOUNT_MNEMONIC is not set');
-    }
     super(
       PostProvider,
       name,
       {
-        ...props,
+        // outputs
         chain: undefined,
         sender: undefined,
         type: undefined,
@@ -235,10 +249,15 @@ export class Post extends pulumi.dynamic.Resource {
         size: undefined,
         time: undefined,
         item_type: undefined,
-        item_content: undefined,
-        hash_type: undefined,
         item_hash: undefined,
+        // Created
+        content_address: undefined,
+        content_type: undefined,
+        content_content: undefined,
+        content_time: undefined,
         aleph_explorer_url: undefined,
+        // inputs
+        ...props,
       },
       opts
     );
