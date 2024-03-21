@@ -60,19 +60,24 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
     olds: StoreStringOutputs,
     news: StoreStringProviderInputs
   ) {
+    const replaces = [];
+
     if (olds[propChannel] !== news[propChannel]) {
-      return { deleteAndReplace: true };
+      replaces.push(propChannel);
     }
     if (olds[propStorageEngine] !== news[propStorageEngine]) {
-      return { deleteAndReplace: true };
+      replaces.push(propStorageEngine);
     }
     if (olds[propStringContentMimeType] !== news[propStringContentMimeType]) {
-      return { deleteAndReplace: true };
+      replaces.push(propStringContentMimeType);
     }
     if (olds.string_content_hashed !== hashString(news[propStringContent])) {
-      return { deleteAndReplace: true };
+      replaces.push(propStringContent);
     }
-    return { changes: false };
+    if (replaces.length === 0) {
+      return { changes: false };
+    }
+    return { replaces: replaces };
   },
 
   async update(id: string, olds: StoreStringOutputs, news: StoreStringInputs) {
