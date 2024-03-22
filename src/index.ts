@@ -1,11 +1,21 @@
-import { PostInputs, Post, PostOutputs } from './Post';
-export { PostInputs, Post, PostOutputs };
+import { Post, PostInputs, PostOutputs } from './Post';
+export { Post, PostInputs, PostOutputs };
 
-import { AggregateInputs, Aggregate } from './Aggregate';
-export { AggregateInputs, Aggregate };
+import { Aggregate, AggregateInputs, AggregateOutputs } from './Aggregate';
+export { Aggregate, AggregateInputs, AggregateOutputs };
 
-import { securityKey, SecurityKeyConf, SecurityKeyTypes } from './SecurityKey';
-export { securityKey, SecurityKeyConf, SecurityKeyTypes };
+import {
+  securityKey,
+  SecurityKeyConf,
+  SecurityKeyTypes,
+  SecurityKeyAuthorization,
+} from './SecurityKey';
+export {
+  securityKey,
+  SecurityKeyConf,
+  SecurityKeyTypes,
+  SecurityKeyAuthorization,
+};
 
 import {
   StoreString,

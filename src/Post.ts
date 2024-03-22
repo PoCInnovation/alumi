@@ -4,16 +4,10 @@ import { Publish as publishPost } from 'aleph-sdk-ts/dist/messages/post';
 import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
 import { Get as getPost } from 'aleph-sdk-ts/dist/messages/post';
 import { getAccount, getAlephExplorerUrl } from './utils';
-
-export type JSONValue =
-  | string
-  | number
-  | boolean
-  | { [x: string]: JSONValue }
-  | Array<JSONValue>;
+import type { JSONDict } from './types';
 
 export interface PostInputs {
-  content: pulumi.Input<{ [x: string]: JSONValue }>;
+  content: pulumi.Input<JSONDict>;
   postType: pulumi.Input<string>;
   channel: pulumi.Input<string>;
   storageEngine: pulumi.Input<ItemType>;
@@ -22,7 +16,7 @@ export interface PostInputs {
 }
 
 interface PostProviderInputs {
-  content: { [x: string]: JSONValue };
+  content: JSONDict;
   postType: string;
   channel: string;
   storageEngine: ItemType;
@@ -39,7 +33,7 @@ const propAccountEnvName = 'accountEnvName';
 
 export interface PostOutputs {
   // inputs
-  content: { [x: string]: JSONValue };
+  content: JSONDict;
   postType: string;
   storageEngine: ItemType;
   accountEnvName: string;
@@ -57,14 +51,13 @@ export interface PostOutputs {
   // Created
   content_address: string;
   content_type: string;
-  content_content: { [x: string]: JSONValue };
+  content_content: JSONDict;
   content_time: number;
   aleph_explorer_url: string;
 }
 
 const PostProvider: pulumi.dynamic.ResourceProvider = {
   async diff(id: string, olds: PostOutputs, news: PostProviderInputs) {
-    const deleteAndReplace = [];
     const replaces = [];
     const changes = [];
 
@@ -95,6 +88,7 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
       content: news[propContent],
       postType: 'amend',
       channel: news[propChannel],
+      accountEnvName: news[propAccountEnvName],
       storageEngine: news[propStorageEngine],
       ref: olds.item_hash,
     };
@@ -209,7 +203,7 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
 
 export class Post extends pulumi.dynamic.Resource {
   // inputs
-  public readonly content!: pulumi.Output<{ [x: string]: JSONValue }>;
+  public readonly content!: pulumi.Output<JSONDict>;
   public readonly postType!: pulumi.Output<string>;
   public readonly storageEngine!: pulumi.Output<string>;
   public readonly accountEnvName!: pulumi.Output<string>;
@@ -227,7 +221,7 @@ export class Post extends pulumi.dynamic.Resource {
   // Created
   public readonly content_address!: pulumi.Output<string>;
   public readonly content_type!: pulumi.Output<string>;
-  public readonly content_content!: pulumi.Output<{ [x: string]: JSONValue }>;
+  public readonly content_content!: pulumi.Output<JSONDict>;
   public readonly content_time!: pulumi.Output<number>;
   public readonly aleph_explorer_url!: pulumi.Output<string>;
 

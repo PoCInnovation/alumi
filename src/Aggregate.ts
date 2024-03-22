@@ -1,160 +1,154 @@
 import * as pulumi from '@pulumi/pulumi';
-import { messages } from 'aleph-sdk-ts';
 import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base.d.ts';
-import { ImportAccountFromMnemonic } from 'aleph-sdk-ts/dist/accounts/ethereum';
-
-export type JSONValue =
-  | string
-  | number
-  | boolean
-  | { [x: string]: JSONValue }
-  | Array<JSONValue>;
+import { Publish as publishAggregate } from 'aleph-sdk-ts/dist/messages/aggregate';
+import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
+import { Get as getAggregate } from 'aleph-sdk-ts/dist/messages/aggregate';
+import { getAccount, getAlephExplorerUrl } from './utils';
+import type { JSONDict } from './types';
 
 export interface AggregateInputs {
   key: pulumi.Input<string>;
-  content: pulumi.Input<{ [x: string]: JSONValue }>;
+  content: pulumi.Input<JSONDict>;
   channel: pulumi.Input<string>;
   storageEngine: pulumi.Input<ItemType>;
+  accountEnvName: pulumi.Input<string>;
 }
 
 interface AggregateProviderInputs {
   key: string;
-  content: { [x: string]: JSONValue };
+  content: JSONDict;
   channel: string;
-  storageEngine?: ItemType;
+  storageEngine: ItemType;
+  accountEnvName: string;
 }
 
-interface AggregateProviderOutputs {
+const propKey = 'key';
+const propContent = 'content';
+const propChannel = 'channel';
+const propStorageEngine = 'storageEngine';
+const propAccountEnvName = 'accountEnvName';
+
+export interface AggregateOutputs {
+  // inputs
   key: string;
+  content: JSONDict;
+  storageEngine: ItemType;
+  accountEnvName: string;
+  // outputs
   chain: string;
+  channel: string;
   sender: string;
   type: string;
-  channel: string;
   confirmed: boolean;
   signature: string;
   size: number;
   time: number;
   item_type: string;
-  item_content?: string;
-  hash_type?: string;
   item_hash: string;
+  // Created
+  content_address: string;
+  content_key: string;
+  content_time: number;
+  content_content: JSONDict;
   aleph_explorer_url: string;
-  content: { [x: string]: JSONValue };
-  storageEngine?: ItemType;
 }
-
-const keyProp = 'key';
-const contentProp = 'content';
-const channelProp = 'channel';
-const storageEngineProp = 'storageEngine';
 
 const AggregateProvider: pulumi.dynamic.ResourceProvider = {
   async diff(
     id: string,
-    olds: AggregateProviderOutputs,
+    olds: AggregateOutputs,
     news: AggregateProviderInputs
   ) {
-    const deleteAndReplace = [];
     const replaces = [];
     const changes = [];
 
-    if (olds[contentProp] !== news[contentProp]) {
-      changes.push(contentProp);
+    if (olds[propContent] !== news[propContent]) {
+      changes.push(propContent);
     }
-    if (olds[channelProp] !== news[channelProp]) {
-      changes.push(channelProp);
+    if (olds[propChannel] !== news[propChannel]) {
+      replaces.push(propChannel);
     }
-    if (olds[storageEngineProp] !== news[storageEngineProp]) {
-      replaces.push(storageEngineProp);
+    if (olds[propStorageEngine] !== news[propStorageEngine]) {
+      replaces.push(propStorageEngine);
     }
-    if (olds[keyProp] !== news[keyProp]) {
-      deleteAndReplace.push(keyProp);
+    if (olds[propKey] !== news[propKey]) {
+      replaces.push(propKey);
     }
 
-    if (deleteAndReplace.length > 0) {
-      return { deleteAndReplace: true };
-    } else if (replaces.length > 0) {
+    if (replaces.length > 0) {
       return { replaces: replaces };
     } else if (changes.length > 0) {
       return { changes: true };
     } else {
-      return {};
+      return { changes: false };
     }
   },
 
   async update(
     id: string,
-    olds: AggregateProviderOutputs,
+    olds: AggregateOutputs,
     news: AggregateProviderInputs
   ) {
     const inputs = {
-      content: news[contentProp],
-      channel: news[channelProp],
-      storageEngine: news[storageEngineProp],
+      key: news[propKey],
+      content: news[propContent],
+      channel: news[propChannel],
+      storageEngine: news[propStorageEngine],
+      accountEnvName: news[propAccountEnvName],
     };
     return await this.create(inputs);
   },
 
-  async delete(id: string, props: AggregateProviderOutputs) {
-    if (
-      process.env.ACCOUNT_MNEMONIC === undefined ||
-      process.env.ACCOUNT_MNEMONIC === ''
-    ) {
-      throw new Error('ACCOUNT_MNEMONIC is not set');
-    }
-    const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
-    await messages.forget.Publish({
+  async delete(id: string, props: AggregateOutputs) {
+    const account = await getAccount(props[propAccountEnvName]);
+    await publishForget({
       account: account,
-      channel: props.channel,
+      channel: props[propChannel],
       hashes: [props.item_hash],
     });
   },
 
   async create(
     inputs: AggregateProviderInputs
-  ): Promise<pulumi.dynamic.CreateResult<AggregateProviderOutputs>> {
-    if (
-      process.env.ACCOUNT_MNEMONIC === undefined ||
-      process.env.ACCOUNT_MNEMONIC === ''
-    ) {
-      throw new Error('ACCOUNT_MNEMONIC is not set');
-    }
-    const opts: { [key: string]: any } = {};
-    if (process.env.DELEGATE_ADDRESS !== undefined) {
-      opts.address = process.env.DELEGATE_ADDRESS;
-    }
-    const account = ImportAccountFromMnemonic(process.env.ACCOUNT_MNEMONIC);
-    const res = await messages.aggregate.Publish({
-      ...opts,
+  ): Promise<pulumi.dynamic.CreateResult<AggregateOutputs>> {
+    const account = await getAccount(inputs[propAccountEnvName]);
+    const res = await publishAggregate({
       account: account,
-      key: inputs[keyProp],
-      content: inputs[contentProp],
-      channel: inputs[channelProp],
-      storageEngine: inputs[storageEngineProp],
+      key: inputs[propKey],
+      content: inputs[propContent],
+      channel: inputs[propChannel],
+      storageEngine: inputs[propStorageEngine],
     });
 
-    const out: AggregateProviderOutputs = {
-      ...inputs,
+    const out: AggregateOutputs = {
+      // inputs
+      key: inputs[propKey],
+      content: inputs[propContent],
+      storageEngine: inputs[propStorageEngine],
+      accountEnvName: inputs[propAccountEnvName],
+      // outputs
       chain: res.chain,
+      channel: res.channel,
       sender: res.sender,
       type: res.type,
-      channel: res.channel,
       confirmed: res.confirmed,
       signature: res.signature,
       size: res.size,
       time: res.time,
       item_type: res.item_type,
       item_hash: res.item_hash,
-      aleph_explorer_url: encodeURI(
-        `https://explorer.aleph.im/address/${res.chain}/${res.sender}/message/${res.type}/${res.item_hash}`
+      // Created
+      content_address: res.content.address,
+      content_key: res.content.key.toString(),
+      content_time: res.content.time,
+      content_content: res.content.content,
+      aleph_explorer_url: getAlephExplorerUrl(
+        res.chain,
+        res.sender,
+        res.type,
+        res.item_hash
       ),
     };
-    if (res.item_content !== undefined) {
-      out.item_content = res.item_content;
-    }
-    if (res.hash_type !== undefined) {
-      out.hash_type = res.hash_type;
-    }
 
     return {
       id: `${account.address}-${res.item_hash}`,
@@ -162,57 +156,63 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
     };
   },
 
-  async read(id: string, props: AggregateProviderInputs) {
-    if (process.env.DELEGATE_ADDRESS === undefined) {
-      throw new Error('DELEGATE_ADDRESS is not set');
-    }
-    const res: { [key: string]: JSONValue } = await messages.aggregate.Get({
-      // @ts-ignore
-      keys: [props.key],
-      address: process.env.DELEGATE_ADDRESS,
+  async read(id: string, props: AggregateOutputs) {
+    const account = await getAccount(props[propAccountEnvName]);
+    const res: JSONDict = await getAggregate({
+      key: props[propKey],
+      address: account.address,
     });
 
-    if (res[props.key] === null || res[props.key] === undefined) {
+    if (res[props[propKey]] === null || res[props[propKey]] === undefined) {
       throw new Error('Aggregate not found');
     }
 
-    throw new Error(
-      'Not implemented:: Pulumi does not support returning values needed for this'
-    );
+    const out: AggregateOutputs = {
+      ...props,
+      content_content: res[props[propKey]] as JSONDict,
+    };
+
+    return {
+      id: id,
+      outs: out,
+    };
   },
 };
 
 export class Aggregate extends pulumi.dynamic.Resource {
-  public readonly chain!: pulumi.Output<string>;
-  public readonly sender!: pulumi.Output<string>;
-  public readonly type!: pulumi.Output<string>;
-  public readonly channel!: pulumi.Output<string>;
-  public readonly confirmed!: pulumi.Output<boolean>;
-  public readonly signature!: pulumi.Output<string>;
-  public readonly size!: pulumi.Output<number>;
-  public readonly time!: pulumi.Output<number>;
-  public readonly item_type!: pulumi.Output<string>;
-  public readonly item_content!: pulumi.Output<string | undefined>;
-  public readonly hash_type!: pulumi.Output<string | undefined>;
-  public readonly item_hash!: pulumi.Output<string>;
-  public readonly aleph_explorer_url!: pulumi.Output<string>;
+  // inputs
+  key!: pulumi.Output<string>;
+  content!: pulumi.Output<JSONDict>;
+  storageEngine!: pulumi.Output<ItemType>;
+  accountEnvName!: pulumi.Output<string>;
+  // outputs
+  chain!: pulumi.Output<string>;
+  channel!: pulumi.Output<string>;
+  sender!: pulumi.Output<string>;
+  type!: pulumi.Output<string>;
+  confirmed!: pulumi.Output<boolean>;
+  signature!: pulumi.Output<string>;
+  size!: pulumi.Output<number>;
+  time!: pulumi.Output<number>;
+  item_type!: pulumi.Output<string>;
+  item_hash!: pulumi.Output<string>;
+  // Created
+  content_address!: pulumi.Output<string>;
+  content_key!: pulumi.Output<string>;
+  content_time!: pulumi.Output<number>;
+  content_content!: pulumi.Output<JSONDict>;
+  aleph_explorer_url!: pulumi.Output<string>;
 
   constructor(
     name: string,
     props: AggregateInputs,
     opts?: pulumi.CustomResourceOptions
   ) {
-    if (
-      process.env.ACCOUNT_MNEMONIC === undefined ||
-      process.env.ACCOUNT_MNEMONIC === ''
-    ) {
-      throw new Error('ACCOUNT_MNEMONIC is not set');
-    }
     super(
       AggregateProvider,
       name,
       {
-        ...props,
+        // outputs
         chain: undefined,
         sender: undefined,
         type: undefined,
@@ -221,10 +221,15 @@ export class Aggregate extends pulumi.dynamic.Resource {
         size: undefined,
         time: undefined,
         item_type: undefined,
-        item_content: undefined,
-        hash_type: undefined,
         item_hash: undefined,
+        // Created
+        content_address: undefined,
+        content_key: undefined,
+        content_time: undefined,
+        content_content: undefined,
         aleph_explorer_url: undefined,
+        // inputs
+        ...props,
       },
       opts
     );

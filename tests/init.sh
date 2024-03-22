@@ -44,3 +44,4 @@ npm add "./alumi-module"
 
 echo "Please export env variable like this:"
 echo "export ETH_ACCOUNT_MNEMONIC='ETHERUM:MNEMONIK:love velvet doctor enough general tail orphan ivory skirt wait athlete enforce'"
+echo "export ADDRESS_SECU_GIVE='0x43dd0431e8869f126F015518874185bf069cEa18'"

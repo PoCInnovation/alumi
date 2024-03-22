@@ -21,7 +21,7 @@ If you don't use cURL, check this [Link](https://www.pulumi.com/docs/install/)
 
 ### Quickstart
 
-[Explain how to run this project]
+See [Documentation](./DOCS.md)
 
 ### Usage
 
