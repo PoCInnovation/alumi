@@ -1,4 +1,4 @@
-import { Post, storeFile, Aggregate, securityKey } from "pulumi-dynamic-provider-aleph";
+import { Post, storeFile, Aggregate, securityKey, Program, getDefaultRuntime } from "pulumi-dynamic-provider-aleph";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 import * as pulumi from "@pulumi/pulumi";
 
@@ -48,3 +48,26 @@ export const secuKey = securityKey("key", {
     accountEnvName: "ETH_ACCOUNT_MNEMONIC",
 });
 export const secuKeyExplorer = secuKey.aleph_explorer_url;
+
+let program: any = undefined;
+let programVmUrl: any = undefined;
+let programExplorer: any = undefined;
+if (process.env.ETH_ACC_PERSO !== undefined) {
+    program = new Program("program-basic", {
+        channel: "pulumi-test-channel",
+        path: "./basicprogram/main.py",
+        entryPoint: "main:app",
+        memory: 128,
+        runtime: getDefaultRuntime(),
+        volumes: [],
+        storageEngine: ItemType.storage,
+        inlineRequested: true,
+        accountEnvName: "ETH_ACC_PERSO",
+    });
+    programVmUrl = program.aleph_vm_url;
+    programExplorer = program.aleph_explorer_url;
+}
+
+export const exportProgram = program;
+export const exportProgramVmUrl = programVmUrl;
+export const exportProgramExplorer = programExplorer;

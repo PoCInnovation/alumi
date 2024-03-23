@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
+    "@types/archiver": "^6.0.2",
     "@types/mime-types": "^2.1.4",
     "prettier": "^3.1.0",
     "typescript": "^5.3.2"
@@ -30,6 +31,7 @@
   "dependencies": {
     "@pulumi/pulumi": "^3.94.2",
     "aleph-sdk-ts": "^3.7.0",
+    "archiver": "^7.0.1",
     "mime-types": "^2.1.35"
   }
 }

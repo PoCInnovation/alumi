@@ -19,6 +19,10 @@ import {
 } from 'aleph-sdk-ts/dist/accounts/substrate';
 import * as crypto from 'crypto';
 import type { Account } from 'aleph-sdk-ts/dist/accounts/account.d.ts';
+import { createWriteStream, lstatSync, mkdirSync } from 'fs';
+import { tmpdir } from 'os';
+import { join, basename, dirname } from 'path';
+import { default as archiver } from 'archiver';
 
 export const getAccount = async (envName?: string): Promise<Account> => {
   if (envName === undefined) {
@@ -126,4 +130,37 @@ export const getAlephExplorerUrl = (
     '/' +
     encodeURIComponent(item_hash)
   );
+};
+
+export const zipPath = async (key: string, path: string) => {
+  if (path.endsWith('.zip')) {
+    return path;
+  }
+  const outputPath = join(tmpdir(), 'alumi', `${key}.zip`);
+  mkdirSync(dirname(outputPath), { recursive: true });
+  const output = createWriteStream(outputPath);
+  const archive = archiver('zip', {
+    zlib: { level: 0 },
+  });
+  archive.on('warning', function (err) {
+    if (err.code === 'ENOENT') {
+      console.log(err);
+    } else {
+      throw err;
+    }
+  });
+  archive.on('error', function (err) {
+    throw err;
+  });
+  archive.pipe(output);
+  const fileStat = lstatSync(path);
+  if (fileStat.isDirectory()) {
+    archive.directory(path, '/', { prefix: '/' });
+  } else if (fileStat.isFile()) {
+    archive.file(path, { name: basename(path) });
+  } else {
+    throw new Error(`invalid path ${path}`);
+  }
+  await archive.finalize();
+  return outputPath;
 };

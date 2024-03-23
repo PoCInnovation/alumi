@@ -29,3 +29,26 @@ export { storeFile, StoreFileConf };
 
 import { hashString, getAccount } from './utils';
 export { hashString, getAccount };
+
+import {
+  // TODO: Subscription (but broken for now)
+  // Subscription,
+  getImmutableVolume,
+  getEphemeralVolume,
+  Volume,
+  ProgramInputs,
+  ProgramOutputs,
+  getDefaultRuntime,
+  Program,
+} from './Program';
+export {
+  // TODO: Subscription (but broken for now)
+  // Subscription,
+  getImmutableVolume,
+  getEphemeralVolume,
+  Volume,
+  ProgramInputs,
+  ProgramOutputs,
+  getDefaultRuntime,
+  Program,
+};
