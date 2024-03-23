@@ -62,7 +62,9 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
     const replaces = [];
     const changes = [];
 
-    if (olds[propContent] !== news[propContent]) {
+    if (
+      JSON.stringify(olds[propContent]) !== JSON.stringify(news[propContent])
+    ) {
       changes.push(propContent);
     }
     if (olds[propChannel] !== news[propChannel]) {
