@@ -108,11 +108,13 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
       storageEngine: inputs[propStorageEngine],
     });
     const out: StoreStringOutputs = {
+      // inputs
       stringContent: inputs[propStringContent],
       stringContentMimeType: inputs[propStringContentMimeType],
       storageEngine: inputs[propStorageEngine],
       accountEnvName: inputs[propAccountEnvName],
-      channel: inputs[propChannel],
+      // outputs
+      channel: res.channel,
       signature: res.signature,
       chain: res.chain,
       sender: res.sender,
@@ -122,6 +124,7 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
       size: res.size,
       item_type: res.item_type,
       item_hash: res.item_hash,
+      // Created
       content_address: res.content.address,
       content_item_type: res.content.item_type,
       content_item_hash: res.content.item_hash,
@@ -164,10 +167,12 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
 };
 
 export class StoreString extends pulumi.dynamic.Resource {
+  // inputs
   public readonly stringContent!: pulumi.Output<string>;
   public readonly stringContentMimeType!: pulumi.Output<string>;
   public readonly storageEngine!: pulumi.Output<string>;
   public readonly accountEnvName!: pulumi.Output<string>;
+  // outputs
   public readonly signature!: pulumi.Output<string>;
   public readonly chain!: pulumi.Output<string>;
   public readonly sender!: pulumi.Output<string>;
@@ -178,6 +183,7 @@ export class StoreString extends pulumi.dynamic.Resource {
   public readonly size!: pulumi.Output<number>;
   public readonly item_type!: pulumi.Output<string>;
   public readonly item_hash!: pulumi.Output<string>;
+  // Created
   public readonly content_address!: pulumi.Output<string>;
   public readonly content_item_type!: pulumi.Output<string>;
   public readonly content_item_hash!: pulumi.Output<string>;
