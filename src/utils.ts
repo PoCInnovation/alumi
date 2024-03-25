@@ -140,7 +140,7 @@ export const zipPath = async (key: string, path: string) => {
   mkdirSync(dirname(outputPath), { recursive: true });
   const output = createWriteStream(outputPath);
   const archive = archiver('zip', {
-    zlib: { level: 0 },
+    zlib: { level: 8 },
   });
   archive.on('warning', function (err) {
     if (err.code === 'ENOENT') {
