@@ -149,7 +149,9 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
     if (olds[propRuntime] !== news[propRuntime]) {
       replaces.push(propRuntime);
     }
-    if (olds[propVolumes] !== news[propVolumes]) {
+    if (
+      JSON.stringify(olds[propVolumes]) !== JSON.stringify(news[propVolumes])
+    ) {
       replaces.push(propVolumes);
     }
     if (olds[propStorageEngine] !== news[propStorageEngine]) {
