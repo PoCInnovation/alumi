@@ -147,9 +147,9 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
     const res = await getStore({
       fileHash: props.item_hash,
     });
-    const raw_file_url = encodeURI(
-      `https://api2.aleph.im/api/v0/storage/raw/${props.content_item_hash}`
-    );
+    const raw_file_url =
+      'https://api2.aleph.im/api/v0/storage/raw/' +
+      encodeURIComponent(props.content_item_hash);
     props[propStringContent] = new TextDecoder().decode(res);
     props.string_content_hashed = hashString(props[propStringContent]);
     const out: StoreStringOutputs = {
