@@ -1,5 +1,5 @@
 import { Post, storeFile, Aggregate, securityKey, Program, getDefaultRuntime } from "pulumi-dynamic-provider-aleph";
-import { ItemType } from "aleph-sdk-ts/dist/messages/types";
+import { ItemType } from "@aleph-sdk/message";
 import * as pulumi from "@pulumi/pulumi";
 
 export const messageTest = new Post("messageTest", {
@@ -61,7 +61,6 @@ if (process.env.ETH_ACC_PERSO !== undefined) {
         runtime: getDefaultRuntime(),
         volumes: [],
         storageEngine: ItemType.storage,
-        inlineRequested: true,
         accountEnvName: "ETH_ACC_PERSO",
     });
     programVmUrl = program.aleph_vm_url;

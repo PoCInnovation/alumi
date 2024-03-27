@@ -1,8 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
-import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base.d.ts';
-import { Publish as publishPost } from 'aleph-sdk-ts/dist/messages/post';
-import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
-import { Get as getPost } from 'aleph-sdk-ts/dist/messages/post';
+import type { ItemType } from '@aleph-sdk/message';
+import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { getAccount, getAlephExplorerUrl } from './utils';
 import type { JSONDict } from './types';
 
@@ -42,9 +40,7 @@ export interface PostOutputs {
   sender: string;
   type: string;
   channel: string;
-  confirmed: boolean;
   signature: string;
-  size: number;
   time: number;
   item_type: string;
   item_hash: string;
@@ -61,7 +57,9 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
     const replaces = [];
     const changes = [];
 
-    if (olds[propContent] !== news[propContent]) {
+    if (
+      JSON.stringify(olds[propContent]) !== JSON.stringify(news[propContent])
+    ) {
       changes.push(propContent);
     }
     if (olds[propPostType] !== news[propPostType]) {
@@ -97,10 +95,11 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
 
   async delete(id: string, props: PostOutputs) {
     const account = await getAccount(props[propAccountEnvName]);
-    await publishForget({
-      account: account,
+    const client = new AuthenticatedAlephHttpClient(account);
+    await client.forget({
       channel: props[propChannel],
       hashes: [props.item_hash],
+      sync: true,
     });
   },
 
@@ -108,14 +107,15 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
     inputs: PostProviderInputs
   ): Promise<pulumi.dynamic.CreateResult<PostOutputs>> {
     const account = await getAccount(inputs[propAccountEnvName]);
+    const client = new AuthenticatedAlephHttpClient(account);
     const ref = inputs[propRef] == '' ? undefined : inputs[propRef];
-    const res = await publishPost({
-      account: account,
+    const res = await client.createPost({
       content: inputs[propContent],
       postType: inputs[propPostType],
       channel: inputs[propChannel],
       storageEngine: inputs[propStorageEngine],
       ref: ref,
+      sync: true,
     });
 
     const out: PostOutputs = {
@@ -127,11 +127,9 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
       // outputs
       chain: res.chain,
       sender: res.sender,
-      type: res.type,
-      channel: res.channel,
-      confirmed: res.confirmed,
+      type: `${res.type}`,
+      channel: res.channel || '',
       signature: res.signature,
-      size: res.size,
       time: res.time,
       item_type: res.item_type,
       item_hash: res.item_hash,
@@ -144,7 +142,7 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
       aleph_explorer_url: getAlephExplorerUrl(
         res.chain,
         res.sender,
-        res.type,
+        'POST',
         res.item_hash
       ),
     };
@@ -156,41 +154,32 @@ const PostProvider: pulumi.dynamic.ResourceProvider = {
   },
 
   async read(id: string, props: PostOutputs) {
-    const res = await getPost({
+    const account = await getAccount(props[propAccountEnvName]);
+    const client = new AuthenticatedAlephHttpClient(account);
+    const res = await client.getPost({
       types: `${props.postType}`,
       hashes: [props.item_hash],
     });
-    if (res.posts.length != 1) {
-      throw new Error(
-        `Post not found (found ${res.posts.length} posts corresponding with hash '${id}' and type '${props.postType},amend')`
-      );
-    }
 
     const out: PostOutputs = {
       ...props,
-      chain: res.posts[0].chain,
-      sender: res.posts[0].sender,
-      type: res.posts[0].type,
-      channel: res.posts[0].channel,
-      confirmed: res.posts[0].confirmed,
-      signature: res.posts[0].signature,
-      size: res.posts[0].size,
-      time: res.posts[0].time,
-      item_type: res.posts[0].item_type,
-      item_hash: res.posts[0].item_hash,
-      // @ts-ignore
-      content_address: res.posts[0].content.address,
-      // @ts-ignore
-      content_type: res.posts[0].content.type,
-      // @ts-ignore
-      content_content: res.posts[0].content.content,
-      // @ts-ignore
-      content_time: res.posts[0].content.time,
+      chain: res.chain,
+      sender: res.sender,
+      type: `${res.type}`,
+      channel: res.channel || '',
+      signature: res.signature,
+      time: res.time,
+      item_type: res.item_type,
+      item_hash: res.item_hash,
+      content_address: res.content.address,
+      content_type: res.content.type,
+      content_content: res.content.content,
+      content_time: res.content.time,
       aleph_explorer_url: getAlephExplorerUrl(
-        res.posts[0].chain,
-        res.posts[0].sender,
-        res.posts[0].type,
-        res.posts[0].item_hash
+        res.chain,
+        res.sender,
+        'POST',
+        res.item_hash
       ),
     };
 
@@ -212,9 +201,7 @@ export class Post extends pulumi.dynamic.Resource {
   public readonly sender!: pulumi.Output<string>;
   public readonly type!: pulumi.Output<string>;
   public readonly channel!: pulumi.Output<string>;
-  public readonly confirmed!: pulumi.Output<boolean>;
   public readonly signature!: pulumi.Output<string>;
-  public readonly size!: pulumi.Output<number>;
   public readonly time!: pulumi.Output<number>;
   public readonly item_type!: pulumi.Output<string>;
   public readonly item_hash!: pulumi.Output<string>;
@@ -238,9 +225,7 @@ export class Post extends pulumi.dynamic.Resource {
         chain: undefined,
         sender: undefined,
         type: undefined,
-        confirmed: undefined,
         signature: undefined,
-        size: undefined,
         time: undefined,
         item_type: undefined,
         item_hash: undefined,

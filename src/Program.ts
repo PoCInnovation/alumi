@@ -1,8 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
-import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base.d.ts';
-import type { MachineVolume } from 'aleph-sdk-ts/dist/messages/types';
-import { publish as publishProgram } from 'aleph-sdk-ts/dist/messages/program';
-import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
+import type { ItemType, MachineVolume } from '@aleph-sdk/message';
+import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { readFileSync } from 'fs';
 import { getAccount, hashString, getAlephExplorerUrl, zipPath } from './utils';
 
@@ -63,7 +61,6 @@ export interface ProgramInputs {
   runtime: pulumi.Input<string>;
   volumes: pulumi.Input<Array<Volume>>;
   storageEngine: pulumi.Input<ItemType.ipfs | ItemType.storage>;
-  inlineRequested: pulumi.Input<boolean>;
   accountEnvName: pulumi.Input<string>;
 }
 
@@ -77,7 +74,6 @@ interface ProgramProviderInputs {
   runtime: string;
   volumes: Array<Volume>;
   storageEngine: ItemType.ipfs | ItemType.storage;
-  inlineRequested: boolean;
   accountEnvName: string;
 }
 
@@ -90,7 +86,6 @@ const propMemory = 'memory';
 const propRuntime = 'runtime';
 const propVolumes = 'volumes';
 const propStorageEngine = 'storageEngine';
-const propInlineRequested = 'inlineRequested';
 const propAccountEnvName = 'accountEnvName';
 
 export interface ProgramOutputs {
@@ -104,7 +99,6 @@ export interface ProgramOutputs {
   runtime: string;
   volumes: Array<Volume>;
   storageEngine: ItemType.ipfs | ItemType.storage;
-  inlineRequested: boolean;
   accountEnvName: string;
   // outputs
   chain: string;
@@ -157,9 +151,6 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
     if (olds[propStorageEngine] !== news[propStorageEngine]) {
       replaces.push(propStorageEngine);
     }
-    if (olds[propInlineRequested] !== news[propInlineRequested]) {
-      replaces.push(propInlineRequested);
-    }
     if (replaces.length === 0) {
       return { changes: false };
     }
@@ -172,10 +163,11 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
 
   async delete(id: string, props: ProgramOutputs) {
     const account = await getAccount(props[propAccountEnvName]);
-    await publishForget({
-      account: account,
+    const client = new AuthenticatedAlephHttpClient(account);
+    await client.forget({
       channel: props[propChannel],
       hashes: [props.item_hash],
+      sync: true,
     });
   },
 
@@ -183,6 +175,7 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
     inputs: ProgramProviderInputs
   ): Promise<pulumi.dynamic.CreateResult<ProgramOutputs>> {
     const account = await getAccount(inputs[propAccountEnvName]);
+    const client = new AuthenticatedAlephHttpClient(account);
     const outPathZip = await zipPath(
       hashString(inputs[propPath]),
       inputs[propPath]
@@ -192,8 +185,7 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
     const zipBlob = new Blob([zipString], {
       type: 'application/zip',
     });
-    const res = await publishProgram({
-      account: account,
+    const res = await client.createProgram({
       channel: inputs[propChannel],
       file: zipBlob,
       entrypoint: inputs[propEntryPoint],
@@ -217,7 +209,6 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
         }
       }),
       storageEngine: inputs[propStorageEngine],
-      inlineRequested: inputs[propInlineRequested],
     });
     const out: ProgramOutputs = {
       // inputs
@@ -230,18 +221,17 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
       runtime: inputs[propRuntime],
       volumes: inputs[propVolumes],
       storageEngine: inputs[propStorageEngine],
-      inlineRequested: inputs[propInlineRequested],
       accountEnvName: inputs[propAccountEnvName],
       // outputs
       chain: res.chain,
       sender: res.sender,
-      type: res.type,
+      type: `${res.type}`,
       item_hash: res.item_hash,
       // Created
       aleph_explorer_url: getAlephExplorerUrl(
         res.chain,
         res.sender,
-        res.type,
+        'PROGRAM',
         res.item_hash
       ),
       aleph_vm_url: 'https://aleph.sh/vm/' + encodeURIComponent(res.item_hash),
@@ -267,7 +257,6 @@ export class Program extends pulumi.dynamic.Resource {
   public readonly storageEngine!: pulumi.Output<
     ItemType.ipfs | ItemType.storage
   >;
-  public readonly inlineRequested!: pulumi.Output<boolean>;
   public readonly accountEnvName!: pulumi.Output<string>;
   // outputs
   public readonly chain!: pulumi.Output<string>;

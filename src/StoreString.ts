@@ -1,8 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
-import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base.d.ts';
-import { Publish as publishStore } from 'aleph-sdk-ts/dist/messages/store';
-import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
-import { Get as getStore } from 'aleph-sdk-ts/dist/messages/store';
+import type { ItemType } from '@aleph-sdk/message';
+import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { getAccount, hashString, getAlephExplorerUrl } from './utils';
 
 export interface StoreStringInputs {
@@ -39,9 +37,7 @@ export interface StoreStringOutputs {
   sender: string;
   type: string;
   channel: string;
-  confirmed: boolean;
   time: number;
-  size: number;
   item_type: string;
   item_hash: string;
   // Created
@@ -86,10 +82,11 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
 
   async delete(id: string, props: StoreStringOutputs) {
     const account = await getAccount(props[propAccountEnvName]);
-    await publishForget({
-      account: account,
+    const client = new AuthenticatedAlephHttpClient(account);
+    await client.forget({
       channel: props[propChannel],
       hashes: [props.item_hash],
+      sync: true,
     });
   },
 
@@ -97,15 +94,16 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
     inputs: StoreStringProviderInputs
   ): Promise<pulumi.dynamic.CreateResult<StoreStringOutputs>> {
     const account = await getAccount(inputs[propAccountEnvName]);
+    const client = new AuthenticatedAlephHttpClient(account);
     const stringBlob = new Blob([inputs[propStringContent]], {
       type: inputs[propStringContentMimeType],
     });
     const stringHash = hashString(inputs[propStringContent]);
-    const res = await publishStore({
-      account: account,
+    const res = await client.createStore({
       channel: inputs[propChannel],
       fileObject: stringBlob,
       storageEngine: inputs[propStorageEngine],
+      sync: true,
     });
     const out: StoreStringOutputs = {
       // inputs
@@ -114,14 +112,12 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
       storageEngine: inputs[propStorageEngine],
       accountEnvName: inputs[propAccountEnvName],
       // outputs
-      channel: res.channel,
+      channel: res.channel || '',
       signature: res.signature,
       chain: res.chain,
       sender: res.sender,
-      type: res.type,
-      confirmed: res.confirmed,
+      type: `${res.type}`,
       time: res.time,
-      size: res.size,
       item_type: res.item_type,
       item_hash: res.item_hash,
       // Created
@@ -132,7 +128,7 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
       aleph_explorer_url: getAlephExplorerUrl(
         res.chain,
         res.sender,
-        res.type,
+        'STORE',
         res.item_hash
       ),
       raw_file_url:
@@ -147,9 +143,9 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
   },
 
   async read(id: string, props: StoreStringOutputs) {
-    const res = await getStore({
-      fileHash: props.item_hash,
-    });
+    const account = await getAccount(props[propAccountEnvName]);
+    const client = new AuthenticatedAlephHttpClient(account);
+    const res = await client.downloadFile(props.item_hash);
     const raw_file_url = encodeURI(
       `https://api2.aleph.im/api/v0/storage/raw/${props.content_item_hash}`
     );
@@ -178,9 +174,7 @@ export class StoreString extends pulumi.dynamic.Resource {
   public readonly sender!: pulumi.Output<string>;
   public readonly type!: pulumi.Output<string>;
   public readonly channel!: pulumi.Output<string>;
-  public readonly confirmed!: pulumi.Output<boolean>;
   public readonly time!: pulumi.Output<number>;
-  public readonly size!: pulumi.Output<number>;
   public readonly item_type!: pulumi.Output<string>;
   public readonly item_hash!: pulumi.Output<string>;
   // Created
@@ -205,9 +199,7 @@ export class StoreString extends pulumi.dynamic.Resource {
         chain: undefined,
         sender: undefined,
         type: undefined,
-        confirmed: undefined,
         time: undefined,
-        size: undefined,
         item_type: undefined,
         item_hash: undefined,
         content_address: undefined,

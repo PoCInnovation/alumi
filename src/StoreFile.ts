@@ -1,5 +1,5 @@
 import { StoreString } from './StoreString';
-import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base';
+import type { ItemType } from '@aleph-sdk/message';
 import { readFileSync } from 'fs';
 import * as mime from 'mime-types';
 

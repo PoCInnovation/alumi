@@ -1,24 +1,24 @@
-import { ImportAccountFromPrivateKey as accAvalanchePk } from 'aleph-sdk-ts/dist/accounts/avalanche';
+import { importAccountFromPrivateKey as accAvalanchePk } from '@aleph-sdk/avalanche';
 // import { ImportAccountFromPrivateKey as accSolanaPk } from 'aleph-sdk-ts/dist/accounts/solana';
 // import { ImportAccountFromPrivateKey as accTezosPk } from 'aleph-sdk-ts/dist/accounts/tezos';
 import {
-  ImportAccountFromMnemonic as accEtherumMne,
-  ImportAccountFromPrivateKey as accEtherumPk,
-} from 'aleph-sdk-ts/dist/accounts/ethereum';
+  importAccountFromMnemonic as accEtherumMne,
+  importAccountFromPrivateKey as accEtherumPk,
+} from '@aleph-sdk/ethereum';
 import {
-  ImportAccountFromMnemonic as accCosmosMne,
-  ImportAccountFromPrivateKey as accCosmosPk,
-} from 'aleph-sdk-ts/dist/accounts/cosmos';
+  importAccountFromMnemonic as accCosmosMne,
+  importAccountFromPrivateKey as accCosmosPk,
+} from '@aleph-sdk/cosmos';
 import {
-  ImportAccountFromMnemonic as accNuls2Mne,
-  ImportAccountFromPrivateKey as accNuls2Pk,
-} from 'aleph-sdk-ts/dist/accounts/nuls2';
+  importAccountFromMnemonic as accNuls2Mne,
+  importAccountFromPrivateKey as accNuls2Pk,
+} from '@aleph-sdk/nuls2';
 import {
-  ImportAccountFromMnemonic as accSubstrateMne,
-  ImportAccountFromPrivateKey as accSubstratePk,
-} from 'aleph-sdk-ts/dist/accounts/substrate';
+  importAccountFromMnemonic as accSubstrateMne,
+  importAccountFromPrivateKey as accSubstratePk,
+} from '@aleph-sdk/substrate';
 import * as crypto from 'crypto';
-import type { Account } from 'aleph-sdk-ts/dist/accounts/account.d.ts';
+import type { Account } from '@aleph-sdk/account';
 import { createWriteStream, lstatSync, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, basename, dirname } from 'path';
