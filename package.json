@@ -35,8 +35,8 @@
     "@aleph-sdk/ethereum": "^1.0.1",
     "@aleph-sdk/nuls2": "^1.0.1",
     "@aleph-sdk/substrate": "^1.0.1",
+    "@aleph-sdk/message": "^1.0.2",
     "@pulumi/pulumi": "^3.94.2",
-    "archiver": "^7.0.1",
-    "mime-types": "^2.1.35"
+    "archiver": "^7.0.1"
   }
 }

@@ -2,7 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import type { ItemType, MachineVolume } from '@aleph-sdk/message';
 import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { readFileSync } from 'fs';
-import { getAccount, hashString, getAlephExplorerUrl, zipPath } from './utils';
+import { getAccount, hashData, getAlephExplorerUrl, zipPath } from './utils';
 
 // TODO: no subscription for now because broken
 // export type Subscription = Array<{ sender: string; channel: string }>;
@@ -123,12 +123,9 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
     if (olds[propChannel] !== news[propChannel]) {
       replaces.push(propChannel);
     }
-    const outPathZip = await zipPath(
-      hashString(news[propPath]),
-      news[propPath]
-    );
-    const zipString = readFileSync(outPathZip).toString();
-    if (olds.zip_hash !== hashString(zipString)) {
+    const outPathZip = await zipPath(hashData(news[propPath]), news[propPath]);
+    const zipBuffer = readFileSync(outPathZip);
+    if (olds.zip_hash !== hashData(zipBuffer)) {
       replaces.push(propPath);
     }
     if (olds[propEntryPoint] !== news[propEntryPoint]) {
@@ -177,17 +174,14 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
     const account = await getAccount(inputs[propAccountEnvName]);
     const client = new AuthenticatedAlephHttpClient(account);
     const outPathZip = await zipPath(
-      hashString(inputs[propPath]),
+      hashData(inputs[propPath]),
       inputs[propPath]
     );
-    const zipString = readFileSync(outPathZip).toString();
-    const zipHash = hashString(zipString);
-    const zipBlob = new Blob([zipString], {
-      type: 'application/zip',
-    });
+    const zipBuffer = readFileSync(outPathZip);
+    const zipHash = hashData(zipBuffer);
     const res = await client.createProgram({
       channel: inputs[propChannel],
-      file: zipBlob,
+      file: zipBuffer,
       entrypoint: inputs[propEntryPoint],
       // TODO: Subscription (but broken for now)
       // subscription: inputs[propSubscription],

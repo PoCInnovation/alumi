@@ -24,11 +24,11 @@ import {
 } from './StoreString';
 export { StoreString, StoreStringInputs, StoreStringOutputs };
 
-import { storeFile, StoreFileConf } from './StoreFile';
-export { storeFile, StoreFileConf };
+import { StoreFile, StoreFileInputs, StoreFileOutputs } from './StoreFile';
+export { StoreFile, StoreFileInputs, StoreFileOutputs };
 
-import { hashString, getAccount } from './utils';
-export { hashString, getAccount };
+import { hashData, getAccount } from './utils';
+export { hashData, getAccount };
 
 import {
   // TODO: Subscription (but broken for now)

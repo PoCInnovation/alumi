@@ -110,8 +110,8 @@ export const getAccount = async (envName?: string): Promise<Account> => {
   }
 };
 
-export const hashString = (s: string) => {
-  return crypto.createHash('md5').update(s).digest('hex');
+export const hashData = (s: string | Buffer) => {
+  return crypto.createHash('sha512').update(s).digest('hex');
 };
 
 export const getAlephExplorerUrl = (

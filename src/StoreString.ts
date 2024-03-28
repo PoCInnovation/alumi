@@ -1,11 +1,10 @@
 import * as pulumi from '@pulumi/pulumi';
 import type { ItemType } from '@aleph-sdk/message';
 import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
-import { getAccount, hashString, getAlephExplorerUrl } from './utils';
+import { getAccount, hashData, getAlephExplorerUrl } from './utils';
 
 export interface StoreStringInputs {
   stringContent: pulumi.Input<string>;
-  stringContentMimeType: pulumi.Input<string>;
   storageEngine: pulumi.Input<ItemType.ipfs | ItemType.storage>;
   channel: pulumi.Input<string>;
   accountEnvName: pulumi.Input<string>;
@@ -13,14 +12,12 @@ export interface StoreStringInputs {
 
 interface StoreStringProviderInputs {
   stringContent: string;
-  stringContentMimeType: string;
   storageEngine: ItemType.ipfs | ItemType.storage;
   channel: string;
   accountEnvName: string;
 }
 
 const propStringContent = 'stringContent';
-const propStringContentMimeType = 'stringContentMimeType';
 const propStorageEngine = 'storageEngine';
 const propChannel = 'channel';
 const propAccountEnvName = 'accountEnvName';
@@ -28,7 +25,6 @@ const propAccountEnvName = 'accountEnvName';
 export interface StoreStringOutputs {
   // inputs
   stringContent: string;
-  stringContentMimeType: string;
   storageEngine: ItemType.ipfs | ItemType.storage;
   accountEnvName: string;
   // outputs
@@ -64,10 +60,7 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
     if (olds[propStorageEngine] !== news[propStorageEngine]) {
       replaces.push(propStorageEngine);
     }
-    if (olds[propStringContentMimeType] !== news[propStringContentMimeType]) {
-      replaces.push(propStringContentMimeType);
-    }
-    if (olds.string_content_hashed !== hashString(news[propStringContent])) {
+    if (olds.string_content_hashed !== hashData(news[propStringContent])) {
       replaces.push(propStringContent);
     }
     if (replaces.length === 0) {
@@ -96,9 +89,9 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
     const account = await getAccount(inputs[propAccountEnvName]);
     const client = new AuthenticatedAlephHttpClient(account);
     const stringBlob = new Blob([inputs[propStringContent]], {
-      type: inputs[propStringContentMimeType],
+      type: 'text/plain',
     });
-    const stringHash = hashString(inputs[propStringContent]);
+    const stringHash = hashData(inputs[propStringContent]);
     const res = await client.createStore({
       channel: inputs[propChannel],
       fileObject: stringBlob,
@@ -108,7 +101,6 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
     const out: StoreStringOutputs = {
       // inputs
       stringContent: inputs[propStringContent],
-      stringContentMimeType: inputs[propStringContentMimeType],
       storageEngine: inputs[propStorageEngine],
       accountEnvName: inputs[propAccountEnvName],
       // outputs
@@ -150,7 +142,7 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
       `https://api2.aleph.im/api/v0/storage/raw/${props.content_item_hash}`
     );
     props[propStringContent] = new TextDecoder().decode(res);
-    props.string_content_hashed = hashString(props[propStringContent]);
+    props.string_content_hashed = hashData(props[propStringContent]);
     const out: StoreStringOutputs = {
       ...props,
       raw_file_url: raw_file_url,
@@ -165,7 +157,6 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
 export class StoreString extends pulumi.dynamic.Resource {
   // inputs
   public readonly stringContent!: pulumi.Output<string>;
-  public readonly stringContentMimeType!: pulumi.Output<string>;
   public readonly storageEngine!: pulumi.Output<string>;
   public readonly accountEnvName!: pulumi.Output<string>;
   // outputs

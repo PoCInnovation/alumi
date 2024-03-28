@@ -15,6 +15,7 @@ cat > package.json << EOF
   "description": "test test",
   "main": "src/index.ts",
   "scripts": {
+    "format": "prettier --write tsconfig.json src/*"
   },
   "repository": {
     "type": "git",
@@ -34,7 +35,9 @@ cat > package.json << EOF
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
     "typescript": "^5.3.2",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "prettier": "^3.1.0",
+    "@types/ws": "^8.5.10"
   }
 }
 EOF
