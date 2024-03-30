@@ -1,6 +1,6 @@
 import { importAccountFromPrivateKey as accAvalanchePk } from '@aleph-sdk/avalanche';
-// import { ImportAccountFromPrivateKey as accSolanaPk } from 'aleph-sdk-ts/dist/accounts/solana';
-// import { ImportAccountFromPrivateKey as accTezosPk } from 'aleph-sdk-ts/dist/accounts/tezos';
+// import { importAccountFromPrivateKey as accSolanaPk } from '@aleph-sdk/solana';
+import { importAccountFromPrivateKey as accTezosPk } from '@aleph-sdk/tezos';
 import {
   importAccountFromMnemonic as accEtherumMne,
   importAccountFromPrivateKey as accEtherumPk,
@@ -46,6 +46,26 @@ export const getAccount = async (envName?: string): Promise<Account> => {
       switch (method) {
         case 'PRIVATEKEY': {
           return await accAvalanchePk(val);
+        }
+        default: {
+          throw new Error(`invalid method ${method} for ${chain}`);
+        }
+      }
+    }
+    // case 'SOLANA': {
+    //   switch (method) {
+    //     case 'PRIVATEKEY': {
+    //       return await accSolanaPk(val);
+    //     }
+    //     default: {
+    //       throw new Error(`invalid method ${method} for ${chain}`);
+    //     }
+    //   }
+    // }
+    case 'TEZOS': {
+      switch (method) {
+        case 'PRIVATEKEY': {
+          return await accTezosPk(val);
         }
         default: {
           throw new Error(`invalid method ${method} for ${chain}`);
@@ -162,5 +182,8 @@ export const zipPath = async (key: string, path: string) => {
     throw new Error(`invalid path ${path}`);
   }
   await archive.finalize();
+  while (!output.closed) {
+    await new Promise(r => setTimeout(r, 100));
+  }
   return outputPath;
 };

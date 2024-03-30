@@ -7,5 +7,6 @@ app = FastAPI()
 async def root():
     return {
         "message": "Hello World (alumi test)",
-        "from": "alumi"
+        "repo": "https://github.com/PoCInnovation/alumi",
+        "from": "PoCInnovation"
     }

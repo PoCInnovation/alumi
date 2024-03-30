@@ -178,6 +178,11 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
       inputs[propPath]
     );
     const zipBuffer = readFileSync(outPathZip);
+    if (zipBuffer.length > 4 * 1024 * 1024 && inputs[propStorageEngine]) {
+      throw new Error(
+        `storageEngine is ${inputs[propStorageEngine]} but size of the program is ${zipBuffer.length}\nThis can lead to truncated file being sent. Use ItemType.ipfs instead.`
+      );
+    }
     const zipHash = hashData(zipBuffer);
     const res = await client.createProgram({
       channel: inputs[propChannel],
