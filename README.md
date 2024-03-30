@@ -30,7 +30,7 @@ cd my-project
 pulumi new typescript
 ```
 
-You can now edit the file `index.ts` created by pulumi.
+2. You can now edit the file `index.ts` created by pulumi.
 
 ### Usage
 

@@ -24,7 +24,6 @@
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
     "@types/archiver": "^6.0.2",
-    "@types/mime-types": "^2.1.4",
     "prettier": "^3.1.0",
     "typescript": "^5.3.2"
   },
