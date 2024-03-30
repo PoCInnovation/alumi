@@ -19,6 +19,7 @@ import {
 } from '@aleph-sdk/substrate';
 import * as crypto from 'crypto';
 import type { Account } from '@aleph-sdk/account';
+import { DEFAULT_API_V2 } from '@aleph-sdk/core';
 import { createWriteStream, lstatSync, mkdirSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, basename, dirname } from 'path';
@@ -151,6 +152,13 @@ export const getAlephExplorerUrl = (
     encodeURIComponent(item_hash)
   );
 };
+
+export const getRawFileUrl = (content_item_hash) => {
+  return (
+    DEFAULT_API_V2 +
+    encodeURIComponent(content_item_hash)
+  );
+}
 
 export const zipPath = async (key: string, path: string) => {
   if (path.endsWith('.zip')) {

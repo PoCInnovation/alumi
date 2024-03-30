@@ -27,8 +27,8 @@ export { StoreString, StoreStringInputs, StoreStringOutputs };
 import { StoreFile, StoreFileInputs, StoreFileOutputs } from './StoreFile';
 export { StoreFile, StoreFileInputs, StoreFileOutputs };
 
-import { hashData, getAccount } from './utils';
-export { hashData, getAccount };
+import { hashData, getAccount, zipPath, getRawFileUrl } from './utils';
+export { hashData, getAccount, zipPath, getRawFileUrl };
 
 import {
   // TODO: Subscription (but broken for now)

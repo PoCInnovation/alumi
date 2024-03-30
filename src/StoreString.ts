@@ -1,7 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import type { ItemType } from '@aleph-sdk/message';
 import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
-import { getAccount, hashData, getAlephExplorerUrl } from './utils';
+import { getAccount, hashData, getAlephExplorerUrl, getRawFileUrl } from './utils';
 
 export interface StoreStringInputs {
   stringContent: pulumi.Input<string>;
@@ -123,9 +123,7 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
         'STORE',
         res.item_hash
       ),
-      raw_file_url:
-        'https://api2.aleph.im/api/v0/storage/raw/' +
-        encodeURIComponent(res.content.item_hash),
+      raw_file_url: getRawFileUrl(res.content.item_hash),
       string_content_hashed: stringHash,
     };
     return {
@@ -138,9 +136,7 @@ const StoreStringProvider: pulumi.dynamic.ResourceProvider = {
     const account = await getAccount(props[propAccountEnvName]);
     const client = new AuthenticatedAlephHttpClient(account);
     const res = await client.downloadFile(props.item_hash);
-    const raw_file_url = encodeURI(
-      `https://api2.aleph.im/api/v0/storage/raw/${props.content_item_hash}`
-    );
+    const raw_file_url = getRawFileUrl(props.content_item_hash);
     props[propStringContent] = new TextDecoder().decode(res);
     props.string_content_hashed = hashData(props[propStringContent]);
     const out: StoreStringOutputs = {
