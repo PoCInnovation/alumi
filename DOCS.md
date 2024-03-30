@@ -13,6 +13,7 @@ The format of this variable must be `PROVIDER_NAME:METHOD:VALUE`
 | Provider  | Method     | Value        |
 | --------- | ---------- | ------------ |
 | AVALANCHE | PRIVATEKEY | `privatekey` |
+| TEZOS     | PRIVATEKEY | `privatekey` |
 | ETHERUM   | MNEMONIK   | `passphrase` |
 | ETHERUM   | PRIVATEKEY | `privatekey` |
 | COSMOS    | MNEMONIK   | `passphrase` |

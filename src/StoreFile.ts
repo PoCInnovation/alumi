@@ -2,7 +2,12 @@ import * as pulumi from '@pulumi/pulumi';
 import type { ItemType } from '@aleph-sdk/message';
 import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { readFileSync } from 'fs';
-import { getAccount, hashData, getAlephExplorerUrl, getRawFileUrl } from './utils';
+import {
+  getAccount,
+  hashData,
+  getAlephExplorerUrl,
+  getRawFileUrl,
+} from './utils';
 
 export interface StoreFileInputs {
   filePath: pulumi.Input<string>;

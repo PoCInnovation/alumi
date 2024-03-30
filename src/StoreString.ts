@@ -1,7 +1,12 @@
 import * as pulumi from '@pulumi/pulumi';
 import type { ItemType } from '@aleph-sdk/message';
 import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
-import { getAccount, hashData, getAlephExplorerUrl, getRawFileUrl } from './utils';
+import {
+  getAccount,
+  hashData,
+  getAlephExplorerUrl,
+  getRawFileUrl,
+} from './utils';
 
 export interface StoreStringInputs {
   stringContent: pulumi.Input<string>;

@@ -153,12 +153,9 @@ export const getAlephExplorerUrl = (
   );
 };
 
-export const getRawFileUrl = (content_item_hash) => {
-  return (
-    DEFAULT_API_V2 +
-    encodeURIComponent(content_item_hash)
-  );
-}
+export const getRawFileUrl = (content_item_hash: string) => {
+  return DEFAULT_API_V2 + encodeURIComponent(content_item_hash);
+};
 
 export const zipPath = async (key: string, path: string) => {
   if (path.endsWith('.zip')) {
