@@ -3,52 +3,9 @@ import type { ItemType, MachineVolume } from '@aleph-sdk/message';
 import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { readFileSync } from 'fs';
 import { getAccount, hashData, getAlephExplorerUrl, zipPath } from './utils';
+import type { Volume, ImmutableVolume, EphemeralVolume } from './volumes';
 
 export type Subscription = Array<{ sender: string; channel: string }>;
-
-type AbstractVolume = {
-  mount: Array<string>;
-  _type: 'immutable' | 'ephemeral';
-};
-
-type ImmutableVolume = AbstractVolume & {
-  ref: string;
-  use_latest: boolean;
-  _type: 'immutable';
-};
-
-export const getImmutableVolume = (
-  ref: string,
-  use_latest: boolean,
-  mount: Array<string>
-): ImmutableVolume => {
-  return {
-    mount: mount,
-    ref: ref,
-    use_latest: use_latest,
-    _type: 'immutable',
-  };
-};
-
-type EphemeralVolume = AbstractVolume & {
-  ephemeral: true;
-  size_mib: number;
-  _type: 'ephemeral';
-};
-
-export const getEphemeralVolume = (
-  size_mib: number,
-  mount: Array<string>
-): EphemeralVolume => {
-  return {
-    mount: mount,
-    ephemeral: true,
-    size_mib: size_mib,
-    _type: 'ephemeral',
-  };
-};
-
-export type Volume = ImmutableVolume | EphemeralVolume;
 
 export interface ProgramInputs {
   channel: pulumi.Input<string>;
