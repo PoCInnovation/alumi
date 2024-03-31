@@ -5,9 +5,12 @@ import {
   securityKey,
   Program,
   getDefaultRuntime,
+  Instance,
+  getDefaultImage,
 } from 'pulumi-dynamic-provider-aleph';
 import { ItemType } from '@aleph-sdk/message';
 import * as pulumi from '@pulumi/pulumi';
+import { readFileSync } from 'fs';
 
 export const messageTest = new Post('messageTest', {
   content: {
@@ -73,7 +76,27 @@ if (process.env.ETH_ACC_PERSO !== undefined) {
   programVmUrl = program.aleph_vm_url;
   programExplorer = program.aleph_explorer_url;
 }
-
 export const exportProgram = program;
 export const exportProgramVmUrl = programVmUrl;
 export const exportProgramExplorer = programExplorer;
+
+// TODO: Fix?
+// let instance: any = undefined;
+// let instanceExplorer: any = undefined;
+// if (process.env.ETH_ACC_PERSO !== undefined) {
+//   // this path is used in the dockerfile
+//   const filePath = '/root/.ssh/id_ed25519.pub'
+//   const fileContent = readFileSync(filePath, 'utf8');
+//   instance = new Instance('instance-basic', {
+//     channel: 'pulumi-test-channel',
+//     memory: 128,
+//     image: getDefaultImage(),
+//     volumes: [],
+//     storageEngine: ItemType.storage,
+//     accountEnvName: 'ETH_ACC_PERSO',
+//     authorizedKeys: [fileContent],
+//   });
+//   instanceExplorer = instance.aleph_explorer_url;
+// }
+// export const exportInstance = instance;
+// export const exportInstanceExplorer = instanceExplorer;
