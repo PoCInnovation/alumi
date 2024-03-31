@@ -190,3 +190,11 @@ programExplorer = program.aleph_explorer_url;
 - [@aleph-sdk/client/src/authenticatedHttpClient](https://github.com/aleph-im/aleph-sdk-ts/blob/main/packages/client/src/authenticatedHttpClient.ts)
 
 </details>
+
+### Instance
+
+In development.
+
+It is still beta.
+
+Some code is present for when it will be possible.
