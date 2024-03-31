@@ -4,8 +4,7 @@ import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { readFileSync } from 'fs';
 import { getAccount, hashData, getAlephExplorerUrl, zipPath } from './utils';
 
-// TODO: no subscription for now because broken
-// export type Subscription = Array<{ sender: string; channel: string }>;
+export type Subscription = Array<{ sender: string; channel: string }>;
 
 type AbstractVolume = {
   mount: Array<string>;
@@ -55,8 +54,7 @@ export interface ProgramInputs {
   channel: pulumi.Input<string>;
   path: pulumi.Input<string>;
   entryPoint: pulumi.Input<string>;
-  // TODO: Subscription (but broken for now)
-  // subscription: pulumi.Input<Array<Subscription>>;
+  // subscriptions: pulumi.Input<Array<Subscription>>;
   memory: pulumi.Input<number>;
   runtime: pulumi.Input<string>;
   volumes: pulumi.Input<Array<Volume>>;
@@ -68,8 +66,7 @@ interface ProgramProviderInputs {
   channel: string;
   path: string;
   entryPoint: string;
-  // TODO: Subscription (but broken for now)
-  // subscription: Array<Subscription>;
+  // subscriptions: Array<Subscription>;
   memory: number;
   runtime: string;
   volumes: Array<Volume>;
@@ -80,8 +77,7 @@ interface ProgramProviderInputs {
 const propChannel = 'channel';
 const propPath = 'path';
 const propEntryPoint = 'entryPoint';
-// TODO: Subscription (but broken for now)
-// const propSubscription = 'subscription';
+// const propSubscriptions = 'subscriptions';
 const propMemory = 'memory';
 const propRuntime = 'runtime';
 const propVolumes = 'volumes';
@@ -93,8 +89,7 @@ export interface ProgramOutputs {
   channel: string;
   path: string;
   entryPoint: string;
-  // TODO: Subscription (but broken for now)
-  // subscription: Array<Subscription>;
+  // subscriptions: Array<Subscription>;
   memory: number;
   runtime: string;
   volumes: Array<Volume>;
@@ -131,8 +126,11 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
     if (olds[propEntryPoint] !== news[propEntryPoint]) {
       replaces.push(propEntryPoint);
     }
-    // if (olds[propSubscription] !== news[propSubscription]) {
-    //   replaces.push(propSubscription);
+    // if (
+    //   JSON.stringify(olds[propSubscriptions]) !==
+    //   JSON.stringify(news[propSubscriptions])
+    // ) {
+    //   replaces.push(propSubscriptions);
     // }
     if (olds[propMemory] !== news[propMemory]) {
       replaces.push(propMemory);
@@ -188,8 +186,7 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
       channel: inputs[propChannel],
       file: zipBuffer,
       entrypoint: inputs[propEntryPoint],
-      // TODO: Subscription (but broken for now)
-      // subscription: inputs[propSubscription],
+      // subscriptions: inputs[propSubscriptions],
       memory: inputs[propMemory],
       runtime: inputs[propRuntime],
       volumes: inputs[propVolumes].map((volume): MachineVolume => {
@@ -214,8 +211,7 @@ const ProgramProvider: pulumi.dynamic.ResourceProvider = {
       channel: inputs[propChannel],
       path: inputs[propPath],
       entryPoint: inputs[propEntryPoint],
-      // TODO: Subscription (but broken for now)
-      // subscription: inputs[propSubscription],
+      // subscriptions: inputs[propSubscriptions],
       memory: inputs[propMemory],
       runtime: inputs[propRuntime],
       volumes: inputs[propVolumes],
@@ -248,8 +244,7 @@ export class Program extends pulumi.dynamic.Resource {
   public readonly channel!: pulumi.Output<string>;
   public readonly path!: pulumi.Output<string>;
   public readonly entryPoint!: pulumi.Output<string>;
-  // TODO: Subscription (but broken for now)
-  // public readonly subscription!: pulumi.Output<Array<Subscription>>;
+  // public readonly subscriptions!: pulumi.Output<Array<Subscription>>;
   public readonly memory!: pulumi.Output<number>;
   public readonly runtime!: pulumi.Output<string>;
   public readonly volumes!: pulumi.Output<Array<Volume>>;
