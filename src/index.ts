@@ -33,9 +33,6 @@ export { hashData, getAccount, zipPath, getRawFileUrl };
 import {
   // TODO: Subscription (but broken for now)
   // Subscription,
-  getImmutableVolume,
-  getEphemeralVolume,
-  Volume,
   ProgramInputs,
   ProgramOutputs,
   getDefaultRuntime,
@@ -44,11 +41,31 @@ import {
 export {
   // TODO: Subscription (but broken for now)
   // Subscription,
-  getImmutableVolume,
-  getEphemeralVolume,
-  Volume,
   ProgramInputs,
   ProgramOutputs,
   getDefaultRuntime,
   Program,
 };
+
+import {
+  getImmutableVolume,
+  getEphemeralVolume,
+  Volume,
+  EphemeralVolume,
+  ImmutableVolume,
+} from './volumes';
+export {
+  getImmutableVolume,
+  getEphemeralVolume,
+  Volume,
+  EphemeralVolume,
+  ImmutableVolume,
+};
+
+import {
+  InstanceInputs,
+  InstanceOutputs,
+  getDefaultImage,
+  Instance,
+} from './Instance';
+export { InstanceInputs, InstanceOutputs, getDefaultImage, Instance };
