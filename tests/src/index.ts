@@ -1,4 +1,4 @@
-import { Post, storeFile, Aggregate, securityKey } from "pulumi-dynamic-provider-aleph";
+import { Post, storeFile, Aggregate, securityKey } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 import * as pulumi from "@pulumi/pulumi";
 
