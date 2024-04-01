@@ -1,4 +1,4 @@
-# Alumi - pulumi-dynamic-provider-aleph
+# Alumi - @pocinnovation/alumi
 
 - Node Version: v20.11.1
 
@@ -32,7 +32,7 @@ Post content to aleph
 Aleph docs: <https://aleph-im.gitbook.io/ts-sdk/quick-start/message-types/post>
 
 ```ts
-import { Post } from "pulumi-dynamic-provider-aleph";
+import { Post } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const messageTest = new Post("messageTest", {
@@ -56,7 +56,7 @@ Store a string as file to aleph
 Aleph docs: <https://aleph-im.gitbook.io/ts-sdk/quick-start/message-types/store>
 
 ```ts
-import { StoreString } from "pulumi-dynamic-provider-aleph";
+import { StoreString } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const stringStored = StoreString("stringStored", {
@@ -76,7 +76,7 @@ It is a wrapper around `StoreString`
 Aleph docs: <https://aleph-im.gitbook.io/ts-sdk/quick-start/message-types/store>
 
 ```ts
-import { storeFile } from "pulumi-dynamic-provider-aleph";
+import { storeFile } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const fileStored = storeFile("fileStored", {
@@ -95,7 +95,7 @@ Store Key-Value pair
 Aleph docs: <https://aleph-im.gitbook.io/ts-sdk/quick-start/message-types/aggregate>
 
 ```ts
-import { Aggregate } from "pulumi-dynamic-provider-aleph";
+import { Aggregate } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const keyValue = new Aggregate("keyValue", {
@@ -118,7 +118,7 @@ It is wrapper around `Aggregate`
 Aleph docs: <https://aleph-im.gitbook.io/ts-sdk/quick-start/message-types/aggregate/security-key>
 
 ```ts
-import { securityKey } from "pulumi-dynamic-provider-aleph";
+import { securityKey } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const secuKey = securityKey("key", {
