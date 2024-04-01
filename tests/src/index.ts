@@ -38,7 +38,7 @@ export const keyValueExplorer = keyValue.aleph_explorer_url;
 export const secuKey = securityKey("key", {
     authorizations: [
         {
-            address: process.env.ADDRESS_SECU_GIVE,
+            address: process.env.ADDRESS_SECU_GIVE || '',
             types: ['POST'],
             post_types: ['alumi-test'],
             channels: ['pulumi-test-channel'],
