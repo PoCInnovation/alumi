@@ -1,0 +1,15 @@
+name: Test Package
+on: [push]
+
+jobs:
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Dockerfile
+        run: docker build -t alumi .
+
+      - name: Run TSC
+        run: docker run --rm -v $(pwd):/code --workdir /code alumi bash -c 'npm install && npm run build && cd tests && ./tests.sh'

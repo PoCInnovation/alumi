@@ -18,6 +18,9 @@ jobs:
       - name: Prepare the CI environment
         run: npm ci
 
+      - name: Build
+        run: npm run build
+
       - name: Publish
         run: npm publish
         env:

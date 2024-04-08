@@ -7,7 +7,7 @@ import {
   getDefaultRuntime,
   Instance,
   getDefaultImage,
-} from 'pulumi-dynamic-provider-aleph';
+} from '@pocinnovation/alumi';
 import { ItemType } from '@aleph-sdk/message';
 import * as pulumi from '@pulumi/pulumi';
 import { readFileSync } from 'fs';
