@@ -1,5 +1,5 @@
 {
-  "name": "pulumi-dynamic-provider-aleph",
+  "name": "@pocinnovation/alumi",
   "version": "0.0.1",
   "description": "Dynamic pulumi provider for Aleph",
   "main": "dist/index.js",

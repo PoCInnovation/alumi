@@ -1,4 +1,4 @@
-# Alumi - pulumi-dynamic-provider-aleph
+# Alumi - @pocinnovation/alumi
 
 - Node Version: v20.11.1
 
@@ -31,7 +31,7 @@ The format of this variable must be `PROVIDER_NAME:METHOD:VALUE`
 Post content to aleph
 
 ```ts
-import { Post } from "pulumi-dynamic-provider-aleph";
+import { Post } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const messageTest = new Post('messageTest', {
@@ -61,7 +61,7 @@ export const messageTestExplorer = messageTest.aleph_explorer_url;
 Store a String as a File to aleph
 
 ```ts
-import { StoreString } from "pulumi-dynamic-provider-aleph";
+import { StoreString } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const stringStored = StoreString("stringStored", {
@@ -87,7 +87,7 @@ export const stringStoredUrl = stringStored.raw_file_url;
 Store File to aleph
 
 ```ts
-import { StoreFile } from "pulumi-dynamic-provider-aleph";
+import { StoreFile } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const fileIndexJs = new StoreFile('indexJs', {
@@ -112,7 +112,7 @@ export const fileIndexUrl = fileIndexJs.raw_file_url;
 Store Key-Value pair
 
 ```ts
-import { Aggregate } from "pulumi-dynamic-provider-aleph";
+import { Aggregate } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const keyValue = new Aggregate('keyValue', {
@@ -141,7 +141,7 @@ export const keyValueExplorer = keyValue.aleph_explorer_url;
 It is wrapper around `Aggregate`
 
 ```ts
-import { securityKey } from "pulumi-dynamic-provider-aleph";
+import { securityKey } from "@pocinnovation/alumi";
 import { ItemType } from "aleph-sdk-ts/dist/messages/types";
 
 export const secuKey = securityKey('key', {
