@@ -4,7 +4,7 @@ Create a Native Pulumi Provider Package by using the full features of the Pulumi
 
 ## How does it work?
 
-This project is a wrapper of [Aleph SDK](https://aleph-im.gitbook.io/ts-sdk/)
+This project is a wrapper of [Aleph SDK](https://github.com/aleph-im/aleph-sdk-ts)
 
 ## Getting Started
 
@@ -21,7 +21,16 @@ If you don't use cURL, check this [Link](https://www.pulumi.com/docs/install/)
 
 ### Quickstart
 
-See [Documentation](./DOCS.md)
+1. Create a new project:
+
+```bash
+# replace my-project with the name of your project
+mkdir my-project
+cd my-project
+pulumi new typescript
+```
+
+2. You can now edit the file `index.ts` created by pulumi.
 
 ### Usage
 

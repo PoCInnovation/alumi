@@ -15,6 +15,7 @@ cat > package.json << EOF
   "description": "test test",
   "main": "src/index.ts",
   "scripts": {
+    "format": "prettier --write tsconfig.json src/*"
   },
   "repository": {
     "type": "git",
@@ -34,7 +35,9 @@ cat > package.json << EOF
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
     "typescript": "^5.3.2",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "prettier": "^3.1.0",
+    "@types/ws": "^8.5.10"
   }
 }
 EOF
@@ -42,6 +45,8 @@ EOF
 npm install
 npm add "./alumi-module"
 
-echo "Please export env variable like this:"
+echo "## Please export env variable like this:"
 echo "export ETH_ACCOUNT_MNEMONIC='ETHERUM:MNEMONIK:love velvet doctor enough general tail orphan ivory skirt wait athlete enforce'"
 echo "export ADDRESS_SECU_GIVE='0x43dd0431e8869f126F015518874185bf069cEa18'"
+echo "## If you want to test program messages (aleph vm):"
+echo "export ETH_ACC_PERSO='ETHERUM:MNEMONIK:<insert-here-your-mnemonic>'"

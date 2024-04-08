@@ -24,8 +24,31 @@ import {
 } from './StoreString';
 export { StoreString, StoreStringInputs, StoreStringOutputs };
 
-import { storeFile, StoreFileConf } from './StoreFile';
-export { storeFile, StoreFileConf };
+import { StoreFile, StoreFileInputs, StoreFileOutputs } from './StoreFile';
+export { StoreFile, StoreFileInputs, StoreFileOutputs };
 
-import { hashString, getAccount } from './utils';
-export { hashString, getAccount };
+import { hashData, getAccount, zipPath, getRawFileUrl } from './utils';
+export { hashData, getAccount, zipPath, getRawFileUrl };
+
+import {
+  // TODO: Subscription (but broken for now)
+  // Subscription,
+  getImmutableVolume,
+  getEphemeralVolume,
+  Volume,
+  ProgramInputs,
+  ProgramOutputs,
+  getDefaultRuntime,
+  Program,
+} from './Program';
+export {
+  // TODO: Subscription (but broken for now)
+  // Subscription,
+  getImmutableVolume,
+  getEphemeralVolume,
+  Volume,
+  ProgramInputs,
+  ProgramOutputs,
+  getDefaultRuntime,
+  Program,
+};

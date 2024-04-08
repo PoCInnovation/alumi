@@ -23,13 +23,21 @@
   },
   "homepage": "https://github.com/PoCInnovation/alumi#readme",
   "devDependencies": {
-    "@types/mime-types": "^2.1.4",
+    "@types/archiver": "^6.0.2",
     "prettier": "^3.1.0",
     "typescript": "^5.3.2"
   },
   "dependencies": {
+    "@aleph-sdk/avalanche": "^1.0.1",
+    "@aleph-sdk/client": "^1.0.1",
+    "@aleph-sdk/cosmos": "^1.0.1",
+    "@aleph-sdk/ethereum": "^1.0.1",
+    "@aleph-sdk/message": "^1.0.2",
+    "@aleph-sdk/nuls2": "^1.0.1",
+    "@aleph-sdk/solana": "^1.0.1",
+    "@aleph-sdk/substrate": "^1.0.1",
+    "@aleph-sdk/tezos": "^1.0.1",
     "@pulumi/pulumi": "^3.94.2",
-    "aleph-sdk-ts": "^3.7.0",
-    "mime-types": "^2.1.35"
+    "archiver": "^7.0.1"
   }
 }

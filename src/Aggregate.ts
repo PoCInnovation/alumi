@@ -1,8 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
-import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base.d.ts';
-import { Publish as publishAggregate } from 'aleph-sdk-ts/dist/messages/aggregate';
-import { Publish as publishForget } from 'aleph-sdk-ts/dist/messages/forget';
-import { Get as getAggregate } from 'aleph-sdk-ts/dist/messages/aggregate';
+import type { ItemType } from '@aleph-sdk/message';
+import { AuthenticatedAlephHttpClient } from '@aleph-sdk/client';
 import { getAccount, getAlephExplorerUrl } from './utils';
 import type { JSONDict } from './types';
 
@@ -39,9 +37,7 @@ export interface AggregateOutputs {
   channel: string;
   sender: string;
   type: string;
-  confirmed: boolean;
   signature: string;
-  size: number;
   time: number;
   item_type: string;
   item_hash: string;
@@ -62,7 +58,9 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
     const replaces = [];
     const changes = [];
 
-    if (olds[propContent] !== news[propContent]) {
+    if (
+      JSON.stringify(olds[propContent]) !== JSON.stringify(news[propContent])
+    ) {
       changes.push(propContent);
     }
     if (olds[propChannel] !== news[propChannel]) {
@@ -101,10 +99,11 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
 
   async delete(id: string, props: AggregateOutputs) {
     const account = await getAccount(props[propAccountEnvName]);
-    await publishForget({
-      account: account,
+    const client = new AuthenticatedAlephHttpClient(account);
+    await client.forget({
       channel: props[propChannel],
       hashes: [props.item_hash],
+      sync: true,
     });
   },
 
@@ -112,12 +111,14 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
     inputs: AggregateProviderInputs
   ): Promise<pulumi.dynamic.CreateResult<AggregateOutputs>> {
     const account = await getAccount(inputs[propAccountEnvName]);
-    const res = await publishAggregate({
-      account: account,
+    const client = new AuthenticatedAlephHttpClient(account);
+    const res = await client.createAggregate({
+      address: account.address,
       key: inputs[propKey],
       content: inputs[propContent],
       channel: inputs[propChannel],
       storageEngine: inputs[propStorageEngine],
+      sync: true,
     });
 
     const out: AggregateOutputs = {
@@ -128,12 +129,10 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
       accountEnvName: inputs[propAccountEnvName],
       // outputs
       chain: res.chain,
-      channel: res.channel,
+      channel: res.channel || '',
       sender: res.sender,
-      type: res.type,
-      confirmed: res.confirmed,
+      type: `${res.type}`,
       signature: res.signature,
-      size: res.size,
       time: res.time,
       item_type: res.item_type,
       item_hash: res.item_hash,
@@ -145,7 +144,7 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
       aleph_explorer_url: getAlephExplorerUrl(
         res.chain,
         res.sender,
-        res.type,
+        'AGGREGATE',
         res.item_hash
       ),
     };
@@ -158,10 +157,11 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
 
   async read(id: string, props: AggregateOutputs) {
     const account = await getAccount(props[propAccountEnvName]);
-    const res: JSONDict = await getAggregate({
-      key: props[propKey],
-      address: account.address,
-    });
+    const client = new AuthenticatedAlephHttpClient(account);
+    const res: JSONDict = await client.fetchAggregate(
+      account.address,
+      props[propKey]
+    );
 
     if (res[props[propKey]] === null || res[props[propKey]] === undefined) {
       throw new Error('Aggregate not found');
@@ -169,7 +169,7 @@ const AggregateProvider: pulumi.dynamic.ResourceProvider = {
 
     const out: AggregateOutputs = {
       ...props,
-      content_content: res[props[propKey]] as JSONDict,
+      content_content: res,
     };
 
     return {
@@ -190,9 +190,7 @@ export class Aggregate extends pulumi.dynamic.Resource {
   channel!: pulumi.Output<string>;
   sender!: pulumi.Output<string>;
   type!: pulumi.Output<string>;
-  confirmed!: pulumi.Output<boolean>;
   signature!: pulumi.Output<string>;
-  size!: pulumi.Output<number>;
   time!: pulumi.Output<number>;
   item_type!: pulumi.Output<string>;
   item_hash!: pulumi.Output<string>;
@@ -216,9 +214,7 @@ export class Aggregate extends pulumi.dynamic.Resource {
         chain: undefined,
         sender: undefined,
         type: undefined,
-        confirmed: undefined,
         signature: undefined,
-        size: undefined,
         time: undefined,
         item_type: undefined,
         item_hash: undefined,
