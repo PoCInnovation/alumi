@@ -1,24 +1,29 @@
-import { ImportAccountFromPrivateKey as accAvalanchePk } from 'aleph-sdk-ts/dist/accounts/avalanche';
-// import { ImportAccountFromPrivateKey as accSolanaPk } from 'aleph-sdk-ts/dist/accounts/solana';
-// import { ImportAccountFromPrivateKey as accTezosPk } from 'aleph-sdk-ts/dist/accounts/tezos';
+import { importAccountFromPrivateKey as accAvalanchePk } from '@aleph-sdk/avalanche';
+// import { importAccountFromPrivateKey as accSolanaPk } from '@aleph-sdk/solana';
+import { importAccountFromPrivateKey as accTezosPk } from '@aleph-sdk/tezos';
 import {
-  ImportAccountFromMnemonic as accEtherumMne,
-  ImportAccountFromPrivateKey as accEtherumPk,
-} from 'aleph-sdk-ts/dist/accounts/ethereum';
+  importAccountFromMnemonic as accEtherumMne,
+  importAccountFromPrivateKey as accEtherumPk,
+} from '@aleph-sdk/ethereum';
 import {
-  ImportAccountFromMnemonic as accCosmosMne,
-  ImportAccountFromPrivateKey as accCosmosPk,
-} from 'aleph-sdk-ts/dist/accounts/cosmos';
+  importAccountFromMnemonic as accCosmosMne,
+  importAccountFromPrivateKey as accCosmosPk,
+} from '@aleph-sdk/cosmos';
 import {
-  ImportAccountFromMnemonic as accNuls2Mne,
-  ImportAccountFromPrivateKey as accNuls2Pk,
-} from 'aleph-sdk-ts/dist/accounts/nuls2';
+  importAccountFromMnemonic as accNuls2Mne,
+  importAccountFromPrivateKey as accNuls2Pk,
+} from '@aleph-sdk/nuls2';
 import {
-  ImportAccountFromMnemonic as accSubstrateMne,
-  ImportAccountFromPrivateKey as accSubstratePk,
-} from 'aleph-sdk-ts/dist/accounts/substrate';
+  importAccountFromMnemonic as accSubstrateMne,
+  importAccountFromPrivateKey as accSubstratePk,
+} from '@aleph-sdk/substrate';
 import * as crypto from 'crypto';
-import type { Account } from 'aleph-sdk-ts/dist/accounts/account.d.ts';
+import type { Account } from '@aleph-sdk/account';
+import { DEFAULT_API_V2 } from '@aleph-sdk/core';
+import { createWriteStream, lstatSync, mkdirSync } from 'fs';
+import { tmpdir } from 'os';
+import { join, basename, dirname } from 'path';
+import { default as archiver } from 'archiver';
 
 export const getAccount = async (envName?: string): Promise<Account> => {
   if (envName === undefined) {
@@ -42,6 +47,26 @@ export const getAccount = async (envName?: string): Promise<Account> => {
       switch (method) {
         case 'PRIVATEKEY': {
           return await accAvalanchePk(val);
+        }
+        default: {
+          throw new Error(`invalid method ${method} for ${chain}`);
+        }
+      }
+    }
+    // case 'SOLANA': {
+    //   switch (method) {
+    //     case 'PRIVATEKEY': {
+    //       return await accSolanaPk(val);
+    //     }
+    //     default: {
+    //       throw new Error(`invalid method ${method} for ${chain}`);
+    //     }
+    //   }
+    // }
+    case 'TEZOS': {
+      switch (method) {
+        case 'PRIVATEKEY': {
+          return await accTezosPk(val);
         }
         default: {
           throw new Error(`invalid method ${method} for ${chain}`);
@@ -106,8 +131,8 @@ export const getAccount = async (envName?: string): Promise<Account> => {
   }
 };
 
-export const hashString = (s: string) => {
-  return crypto.createHash('md5').update(s).digest('hex');
+export const hashData = (s: string | Buffer) => {
+  return crypto.createHash('sha512').update(s).digest('hex');
 };
 
 export const getAlephExplorerUrl = (
@@ -126,4 +151,44 @@ export const getAlephExplorerUrl = (
     '/' +
     encodeURIComponent(item_hash)
   );
+};
+
+export const getRawFileUrl = (content_item_hash: string) => {
+  return DEFAULT_API_V2 + encodeURIComponent(content_item_hash);
+};
+
+export const zipPath = async (key: string, path: string) => {
+  if (path.endsWith('.zip')) {
+    return path;
+  }
+  const outputPath = join(tmpdir(), 'alumi', `${key}.zip`);
+  mkdirSync(dirname(outputPath), { recursive: true });
+  const output = createWriteStream(outputPath);
+  const archive = archiver('zip', {
+    zlib: { level: 8 },
+  });
+  archive.on('warning', function (err) {
+    if (err.code === 'ENOENT') {
+      console.log(err);
+    } else {
+      throw err;
+    }
+  });
+  archive.on('error', function (err) {
+    throw err;
+  });
+  archive.pipe(output);
+  const fileStat = lstatSync(path);
+  if (fileStat.isDirectory()) {
+    archive.directory(path, '/', { prefix: '/' });
+  } else if (fileStat.isFile()) {
+    archive.file(path, { name: basename(path) });
+  } else {
+    throw new Error(`invalid path ${path}`);
+  }
+  await archive.finalize();
+  while (!output.closed) {
+    await new Promise(r => setTimeout(r, 100));
+  }
+  return outputPath;
 };

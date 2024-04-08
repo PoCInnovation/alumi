@@ -1,5 +1,5 @@
 import { Aggregate } from './Aggregate';
-import type { ItemType } from 'aleph-sdk-ts/dist/messages/types/base';
+import type { ItemType } from '@aleph-sdk/message';
 
 export type SecurityKeyTypes = 'POST' | 'AGGREGATE' | 'STORE';
 
